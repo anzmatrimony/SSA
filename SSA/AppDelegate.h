@@ -13,5 +13,7 @@
 @property (strong, nonatomic) UIWindow *window;
 
 
+- (UIView *) leftViewForTextfiledWithImage:(NSString *)imageName withCornerRadius:(NSArray *)cornersList;
+- (void)applyCornerRadiusForTheView:(UIView *)view withCorners:(NSArray *)cornersList;
 @end
 
