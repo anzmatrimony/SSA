@@ -8,17 +8,21 @@
 
 #import <UIKit/UIKit.h>
 
+@class  AppDelegate;
 @protocol AddSchoolViewControllerProtocol <NSObject>
 
 - (void)didSchoolAdded;
 
 @end
-@interface AddSchoolViewController : UIViewController
+@interface AddSchoolViewController : UIViewController<UITextFieldDelegate>{
+    AppDelegate *appDelegate;
+}
 
 @property (nonatomic, weak) IBOutlet UIView *addSchoolUIDNumberBackgroundview,*confirmSchoolBackgroundView;
 @property (nonatomic, weak) IBOutlet UIView *addSchoolImageBackgroundView,*confirmSchoolImageBackgroundView;
 @property (nonatomic, weak) IBOutlet UIImageView *addSchoolImageView,*confirmSchoolImageView;
 @property (nonatomic, weak) IBOutlet UITextField *UIDNumberField;
+@property (nonatomic, weak) IBOutlet UILabel *schoolNameLabel,*schoolAddressLabel;
 
 @property (nonatomic, assign, getter=isFromSchoolList) BOOL fromSchoolistPage;
 @property (nonatomic, strong) id<AddSchoolViewControllerProtocol> addSchoolViewControllerDelegate;

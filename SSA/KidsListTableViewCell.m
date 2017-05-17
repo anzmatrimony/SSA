@@ -26,4 +26,8 @@
     // Configure the view for the selected state
 }
 
+- (void)updateCellWithData:(KID_MODEL *)kid{
+    [_kidNameLabel setText:[NSString stringWithFormat:@"%@ %@",kid.firstName,kid.lastName]];
+    [_schoolNameLabel setText:kid.schoolName];
+}
 @end

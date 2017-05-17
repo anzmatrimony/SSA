@@ -7,6 +7,7 @@
 //
 
 #import "KidsListViewController.h"
+#import "ObjectManager.h"
 
 @interface KidsListViewController ()
 
@@ -46,7 +47,8 @@
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath{
     KidsListTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"KidsListTableViewCell"];
-    
+    KID_MODEL *kid = [_kidsArray objectAtIndex:indexPath.row];
+    [cell updateCellWithData:kid];
     return cell;
 }
 
@@ -58,5 +60,16 @@
     return UITableViewAutomaticDimension;
 }
 
+- (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath {
+    // Return YES if you want the specified item to be editable.
+    return YES;
+}
+
+// Override to support editing the table view.
+- (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
+    if (editingStyle == UITableViewCellEditingStyleDelete) {
+        //add code here for when you hit delete
+    }
+}
 
 @end

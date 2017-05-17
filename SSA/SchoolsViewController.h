@@ -9,7 +9,10 @@
 #import <UIKit/UIKit.h>
 #import "SchoolsListViewController.h"
 #import "AddSchoolViewController.h"
+@class AppDelegate;
 
 @interface SchoolsViewController : UIViewController<AddSchoolViewControllerProtocol,SchoolsListViewControllerProtocol>
-
+{
+    AppDelegate *appDelegate;
+}
 @end

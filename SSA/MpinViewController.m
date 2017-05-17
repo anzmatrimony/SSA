@@ -59,13 +59,26 @@
 }
 
 - (IBAction)confirmSetMpinAction:(id)sender{
-    [[SharedManager sharedManager] showHomeScreen];
+    if ([self doValidation]) {
+        NSLog(@" Login Status : %@",[[NSUserDefaults standardUserDefaults] objectForKey:@"LoginStatus"]);
+        if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"LoginStatus"] isEqualToString:@"InProcess"]) {
+            [[NSUserDefaults standardUserDefaults] setObject:_mpinTextField.text forKey:@"MPIN"];
+            [[NSUserDefaults standardUserDefaults] setObject:@"Success" forKey:@"LoginStatus"];
+            [[SharedManager sharedManager] showHomeScreen];
+        }else{
+            if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"MPIN"] isEqualToString:_mpinTextField.text]) {
+                [[SharedManager sharedManager] showHomeScreen];
+            }else{
+                [[AlertMessage sharedAlert] showAlertWithMessage:@"Enter valid pin" withDelegate:nil onViewController:self];
+            }
+        }
+    }
 }
 
 // Validating user inputs
 - (BOOL)doValidation{
     if (_mpinTextField.text.length == 0 || _confirmMpinTextField.text.length == 0) {
-        [[AlertMessage sharedAlert] showAlertWithMessage:@"Please fill the fields" withDelegate:nil onViewController:self];
+        [[AlertMessage sharedAlert] showAlertWithMessage:@"Please fill all the fields" withDelegate:nil onViewController:self];
         return NO;
     }else if (![_mpinTextField.text isEqualToString:_confirmMpinTextField.text]){
         [[AlertMessage sharedAlert] showAlertWithMessage:@"Pin and Confirm pin must be same" withDelegate:nil onViewController:self];

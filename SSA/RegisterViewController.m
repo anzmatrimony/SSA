@@ -10,16 +10,20 @@
 #import "Constants.h"
 #import "AppDelegate.h"
 #import "AlertMessage.h"
+#import "ProgressHUD.h"
+#import "ServiceModel.h"
+
 
 @interface RegisterViewController (){
     UITextField *activeTextField;
     BOOL isAgreedToTermsAndConditions;
+    BOOL isGenderMale;
 }
 
-@property (nonatomic, weak) IBOutlet UITextField *firstNameField,*lastNameField,*emailField,*passwordFiedl,*confirmPasswordField;
+@property (nonatomic, weak) IBOutlet UITextField *firstNameField,*lastNameField,*emailField,*passwordFiedl,*confirmPasswordField,*phoneNumberField;
 
-@property (nonatomic, weak) IBOutlet UIView *agreeTextContainerView;
-@property (nonatomic, weak) IBOutlet UIButton *termsAndConditionsCheckBoxButton;
+@property (nonatomic, weak) IBOutlet UIView *agreeTextContainerView,*genderBackgroundView;
+@property (nonatomic, weak) IBOutlet UIButton *termsAndConditionsCheckBoxButton,*maleCheckBoxButton,*femaleCheckBoxButton;
 
 - (IBAction)registerAction:(id)sender;
 @end
@@ -31,15 +35,22 @@
     
     [self.navigationController setNavigationBarHidden:NO animated:YES];
     
+    appDelegate = [[UIApplication sharedApplication] delegate];
+    
+    [appDelegate initializeLocationManager];
     isAgreedToTermsAndConditions = false;
     
-    appDelegate = [[UIApplication sharedApplication] delegate];
+    // By default selecting Male option for gender
+    isGenderMale = true;
+    [self changeGenderSelectionWithFlag:isGenderMale];
     
     [_firstNameField setLeftView: [appDelegate leftViewForTextfiledWithImage:@"user.png" withCornerRadius:nil]];
     
     [_lastNameField setLeftView: [appDelegate leftViewForTextfiledWithImage:@"user.png" withCornerRadius:nil]];
     
     [_emailField setLeftView: [appDelegate leftViewForTextfiledWithImage:@"email.png" withCornerRadius:nil]];
+    
+    [_phoneNumberField setLeftView: [appDelegate leftViewForTextfiledWithImage:@"email.png" withCornerRadius:nil]];
     
     [_passwordFiedl setLeftView: [appDelegate leftViewForTextfiledWithImage:@"pswd.png" withCornerRadius:nil]];
     
@@ -50,6 +61,11 @@
     [self applyDesignToTextField:_emailField];
     [self applyDesignToTextField:_passwordFiedl];
     [self applyDesignToTextField:_confirmPasswordField];
+    [self applyDesignToTextField:_phoneNumberField];
+    
+    [_genderBackgroundView.layer setCornerRadius:0];
+    [_genderBackgroundView.layer setBorderWidth:1];
+    [_genderBackgroundView.layer setBorderColor:COLOR(189, 218, 225).CGColor];
     
     [self buildAgreeTextViewFromString:NSLocalizedString(@"I accept #<ts>Terms and Conditions# and #<pp>Privacy Policy#",
                                                          @"PLEASE NOTE: please translate \"Terms and Conditions\" and \"Privacy Policy\" as well, and leave the #<ts># and #<pp># around your translations just as in the English version of this message.")];
@@ -74,6 +90,19 @@
     textField.leftViewMode = UITextFieldViewModeAlways;
 }
 
+/**
+ * @Discussion updating user interface of gender based on user selection (True -> Male; False -> Female)
+ * @Param flag as a boolean value (True -> Male; False -> Female)
+ */
+- (void)changeGenderSelectionWithFlag:(BOOL)flag{
+    if (flag) { // Male
+        [_maleCheckBoxButton setImage:[UIImage imageNamed:@"CheckMark.png"] forState:UIControlStateNormal];
+        [_femaleCheckBoxButton setImage:[UIImage imageNamed:@""] forState:UIControlStateNormal];
+    }else{ // Female
+        [_maleCheckBoxButton setImage:[UIImage imageNamed:@""] forState:UIControlStateNormal];
+        [_femaleCheckBoxButton setImage:[UIImage imageNamed:@"CheckMark.png"] forState:UIControlStateNormal];
+    }
+}
 - (void)buildAgreeTextViewFromString:(NSString *)localizedString
 {
     // 1. Split the localized string on the # sign:
@@ -177,32 +206,120 @@
 }
 
 - (IBAction)registerAction:(id)sender{
-    
+    if ([self doValidation]) {
+        [self registerParent];
+    }
 }
 
 - (IBAction)termsAndConditionsCheckBoxAction:(id)sender{
     if (isAgreedToTermsAndConditions) {
-        [_termsAndConditionsCheckBoxButton setImage:[UIImage imageNamed:@"black-check-box.png"] forState:UIControlStateNormal];
+        [_termsAndConditionsCheckBoxButton setImage:[UIImage imageNamed:@"check-box-empty.png"] forState:UIControlStateNormal];
     }else{
         [_termsAndConditionsCheckBoxButton setImage:[UIImage imageNamed:@"check-box.png"] forState:UIControlStateNormal];
     }
     isAgreedToTermsAndConditions = !isAgreedToTermsAndConditions;
 }
+
+- (IBAction)genderSelectionAction:(id)sender{
+    if ([sender tag] == 100 || [sender tag] == 200) { // Male
+        isGenderMale = true;
+    }else if ([sender tag] == 300 || [sender tag] == 400){
+        isGenderMale = false;
+    }
+    [self changeGenderSelectionWithFlag:isGenderMale];
+}
 // Validating user inputs
 - (BOOL)doValidation{
-    if (_firstNameField.text.length == 0 || _lastNameField.text.length == 0 || _emailField.text.length == 0 || _passwordFiedl.text.length == 0 || _confirmPasswordField.text.length == 0) {
-        [[AlertMessage sharedAlert] showAlertWithMessage:AlertTitle withDelegate:@"Please fill all the fields" onViewController:self];
+    if (_firstNameField.text.length == 0 || _lastNameField.text.length == 0 || _emailField.text.length == 0 || _passwordFiedl.text.length == 0 || _confirmPasswordField.text.length == 0 || _phoneNumberField.text.length == 0) {
+        [[AlertMessage sharedAlert] showAlertWithMessage:@"Please fill all the fields" withDelegate:nil onViewController:self];
         return NO;
     }else if (![_passwordFiedl.text isEqualToString:_confirmPasswordField.text]){
-        [[AlertMessage sharedAlert] showAlertWithMessage:AlertTitle withDelegate:@"Password and confirm password must be same" onViewController:self];
+        [[AlertMessage sharedAlert] showAlertWithMessage:@"Password and confirm password must be same" withDelegate:nil onViewController:self];
         return NO;
-    }if (!isAgreedToTermsAndConditions) {
-        [[AlertMessage sharedAlert] showAlertWithMessage:AlertTitle withDelegate:@"Please accept terms of service and privacy policy" onViewController:self];
+    }else if (!isAgreedToTermsAndConditions) {
+        [[AlertMessage sharedAlert] showAlertWithMessage:@"Please accept terms of service and privacy policy" withDelegate:nil onViewController:self];
+        return NO;
+    }else if(![self isValidEmail]){
+        [[AlertMessage sharedAlert] showAlertWithMessage:@"Please enter valid email address" withDelegate:nil onViewController:self];
         return NO;
     }
     return YES;
 }
 
+/*!
+ * @discussion validating email address entered by the user
+ * @return boolean value
+ */
+- (BOOL)isValidEmail{
+    BOOL stricterFilter = NO;
+    NSString *stricterFilterString = @"^[A-Z0-9a-z\\._%+-]+@([A-Za-z0-9-]+\\.)+[A-Za-z]{2,4}$";
+    NSString *laxString = @"^.+@([A-Za-z0-9-]+\\.)+[A-Za-z]{2}[A-Za-z]*$";
+    NSString *emailRegex = stricterFilter ? stricterFilterString : laxString;
+    NSPredicate *emailTest = [NSPredicate predicateWithFormat:@"SELF MATCHES %@", emailRegex];
+    return [emailTest evaluateWithObject:_emailField.text];
+}
+
+- (void)registerParent{
+    [[ProgressHUD sharedProgressHUD] showActivityIndicatorOnView:self.view];
+    NSMutableDictionary *mainDict = [[NSMutableDictionary alloc] init];
+    NSMutableDictionary *headersDict = [[NSMutableDictionary alloc] init];
+    [headersDict setObject:@"Mobile" forKey:@"requestedfrom"];
+    [headersDict setObject:[appDelegate getStringFromDate:[NSDate date] withFormat:@"yyyy-MM-dd hh:mm:ss"] forKey:@"requestedon"];
+    [headersDict setObject:[NSString stringWithFormat:@"%@%@",[[_emailField.text componentsSeparatedByString:@"@"] objectAtIndex:0],TimeStamp] forKey:@"userRef"];
+    [headersDict setObject:[appDelegate currentLocation] forKey:@"geolocation"];
+    [mainDict setObject:headersDict forKey:@"header"];
+    
+    NSMutableDictionary *bodyDict = [[NSMutableDictionary alloc] init];
+    [bodyDict setObject:_emailField.text forKey:@"userId"];
+    [bodyDict setObject:_firstNameField.text forKey:@"firstName"];
+    [bodyDict setObject:_lastNameField.text forKey:@"lastName"];
+    [bodyDict setObject:_passwordFiedl.text forKey:@"password"];
+    [bodyDict setObject:_emailField.text forKey:@"emailId"];
+    [bodyDict setObject:_phoneNumberField.text forKey:@"phoneNumber"];
+    [bodyDict setObject:isGenderMale?@"Male":@"Female" forKey:@"Gender"];
+    [mainDict setObject:bodyDict forKey:@"body"];
+    
+    /*NSMutableDictionary *mainDict = [[NSMutableDictionary alloc] init];
+    NSMutableDictionary *headersDict = [[NSMutableDictionary alloc] init];
+    [headersDict setObject:@"website" forKey:@"requestedfrom"];
+    [headersDict setObject:@"dummy" forKey:@"guid"];
+    [headersDict setObject:@"anonymous" forKey:@"userRef"];
+    [headersDict setObject:@"anonymous" forKey:@"geolocation"];
+    [mainDict setObject:headersDict forKey:@"header"];
+    
+    NSMutableDictionary *bodyDict = [[NSMutableDictionary alloc] init];
+    [bodyDict setObject:@"LKG" forKey:@"classe"];
+    [bodyDict setObject:@"Gnanendra Kumar" forKey:@"firstName"];
+    [bodyDict setObject:@"Gnanendra Kumar" forKey:@"lastName"];
+    [bodyDict setObject:@"A" forKey:@"section"];
+    [bodyDict setObject:@"RequelFord" forKey:@"SchoolName"];
+    [bodyDict setObject:@"getthegenerated" forKey:@"SchoolUniqueId"];
+    [bodyDict setObject:@"pending" forKey:@"kidstatus"];
+    [bodyDict setObject:@"parent" forKey:@"createdBy"];
+    [bodyDict setObject:@"TimeStamp" forKey:@"createdOn"];
+    [bodyDict setObject:@"getfromparentData" forKey:@"parentUserRef"];
+    [mainDict setObject:bodyDict forKey:@"body"];*/
+    
+    [ServiceModel makeRequestFor:ParentRegistration WithInputParams:[appDelegate getJsonFormatedStringFrom:mainDict] MakeHttpRequest:^(NSDictionary *response, NSError *error){
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [[ProgressHUD sharedProgressHUD] removeHUD];
+            if (!error) {
+                if ([[response objectForKey:@"body"] objectForKey:@"message"]) {
+                    [[NSUserDefaults standardUserDefaults] setObject:_emailField.text forKey:@"UserName"];
+                    [[NSUserDefaults standardUserDefaults] setObject:_passwordFiedl.text forKey:@"Password"];
+                    [[NSUserDefaults standardUserDefaults] setObject:[NSString stringWithFormat:@"%@%@",[[_emailField.text componentsSeparatedByString:@"@"] objectAtIndex:0],TimeStamp] forKey:@"UserRef"];
+                    
+                    NSLog(@" Message %@", [[response objectForKey:@"body"] objectForKey:@"message"]);
+                    [self.navigationController popToRootViewControllerAnimated:YES];
+                }
+                NSLog(@" Response  : %@", response);
+            }else{
+                NSLog(@" Error : %@", error.localizedDescription);
+            }
+            
+        });
+    }];
+}
 #pragma mark - UITextField Delegate Methods
 - (void)textFieldDidBeginEditing:(UITextField *)textField{
     activeTextField = textField;

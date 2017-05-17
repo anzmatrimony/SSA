@@ -1,12 +1,12 @@
 //
-//  AddKidViewController.m
+//  NewKidViewController.m
 //  SSA
 //
-//  Created by Sunera on 5/1/17.
+//  Created by Sunera on 5/15/17.
 //  Copyright © 2017 surya. All rights reserved.
 //
 
-#import "AddKidViewController.h"
+#import "NewKidViewController.h"
 #import "Constants.h"
 #import "ProgressHUD.h"
 #import "ServiceModel.h"
@@ -15,7 +15,7 @@
 #import "AlertMessage.h"
 #import "ObjectManager.h"
 
-@interface AddKidViewController (){
+@interface NewKidViewController (){
     UITextField *activeTextField;
     NSString *selectedSchool,*selectedClass,*selectedSection,*selectedRelation;
     NSArray *classListArray,*sectionsListArray,*relationShipListArray;
@@ -32,9 +32,10 @@
 
 - (IBAction)submitAction:(id)sender;
 - (IBAction)doneAction:(id)sender;
+
 @end
 
-@implementation AddKidViewController
+@implementation NewKidViewController
 
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -42,7 +43,7 @@
     appDelegate = [[UIApplication sharedApplication] delegate];
     [appDelegate initializeLocationManager];
     schoolsListArray = [[NSMutableArray alloc] init];
-    
+    [self fetchSchoolsList];
     
     classListArray = [[NSArray alloc] initWithObjects:@"UKG",@"LKG",@"First Class",@"Second Class",@"Third Class",@"Fourth Class",@"Fifth Class", nil];
     sectionsListArray = [[NSArray alloc] initWithObjects:@"Section1",@"Section2",@"Section3", nil];
@@ -113,7 +114,7 @@
         [bodyDict setObject:_firstNameField.text forKey:@"firstName"];
         [bodyDict setObject:_lastNameField.text forKey:@"lastName"];
         [bodyDict setObject:selectedSection forKey:@"section"];
-        [bodyDict setObject:[[_schoolButton titleLabel] text] forKey:@"SchoolName"];
+        [bodyDict setObject:selectedSchool forKey:@"SchoolName"];
         [bodyDict setObject:selectedSchool forKey:@"SchoolUniqueId"];
         [bodyDict setObject:@"Pending" forKey:@"kidstatus"];
         [bodyDict setObject:selectedRelation forKey:@"createdBy"];
@@ -134,13 +135,13 @@
                 
             });
         }];
-         
+        
     }
 }
 
 - (void)moveToPreviousScreen{
-    if ([self.addKidViewControllerDelegate respondsToSelector:@selector(didKidAddedWithKidName:AndSchoolName:)]) {
-        [self.addKidViewControllerDelegate didKidAddedWithKidName:[NSString stringWithFormat:@"%@ %@",_firstNameField.text,_lastNameField.text] AndSchoolName:[[_schoolButton titleLabel] text]];
+    if ([self.addKidViewControllerDelegate respondsToSelector:@selector(didKidAdded)]) {
+        [self.addKidViewControllerDelegate didKidAdded];
     }
     
     if ([self isFromKidsListPage]) {
@@ -149,7 +150,6 @@
     }
 }
 - (IBAction)dropDownSelectionAction:(id)sender{
-    [activeTextField resignFirstResponder];
     [_pickerView setTag:[sender tag]];
     [_pickerViewBackgroundView setHidden:false];
     [_pickerView reloadAllComponents];
@@ -162,7 +162,6 @@
 
 - (IBAction)doneAction:(id)sender{
     [_pickerViewBackgroundView setHidden:true];
-    [activeTextField resignFirstResponder];
 }
 
 /**
@@ -201,10 +200,7 @@
 {
     switch ([pickerView tag]) {
         case 100:
-            if (schoolsListArray.count > 0) {
-                return schoolsListArray.count;
-            }
-            return 0;
+            return schoolsListArray.count;
             break;
         case 200:
             return classListArray.count;
@@ -226,17 +222,15 @@
 - (NSString*)pickerView:(UIPickerView *)pickerView titleForRow:(NSInteger)row forComponent:(NSInteger)component
 {
     NSString *title;
-    SCHOOL_MODEL *school;
     switch ([pickerView tag]) {
         case 100:
-            school = [schoolsListArray objectAtIndex:row];
-            title = school.SchoolName;
+            title = [schoolsListArray objectAtIndex:row];
             break;
         case 200:
             title = [classListArray objectAtIndex:row];
             break;
         case 300:
-            title = [sectionsListArray objectAtIndex:row];
+            title = [schoolsListArray objectAtIndex:row];
             break;
         case 400:
             title = [relationShipListArray objectAtIndex:row];
@@ -253,17 +247,14 @@
     NSString *title;
     switch ([pickerView tag]) {
         case 100:
-            if (schoolsListArray.count > 0) {
-                [self updateSelectedSchool:[schoolsListArray objectAtIndex:row]];
-            }
-            
+            [self updateSelectedSchool:[schoolsListArray objectAtIndex:row]];
             break;
         case 200:
             selectedClass = [classListArray objectAtIndex:row];
             [_classButton setTitle:selectedClass forState:UIControlStateNormal];
             break;
         case 300:
-            selectedSection = [sectionsListArray objectAtIndex:row];
+            selectedSection = [schoolsListArray objectAtIndex:row];
             [_sectionButton setTitle:selectedSection forState:UIControlStateNormal];
             break;
         case 400:

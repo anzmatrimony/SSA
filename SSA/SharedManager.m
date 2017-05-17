@@ -61,7 +61,7 @@ static SharedManager *singleTonManager;
     NSString * storyboardName = @"Main";
     UIStoryboard *storyboard = [UIStoryboard storyboardWithName:storyboardName bundle: nil];
     mPinViewController = [storyboard instantiateViewControllerWithIdentifier:@"MpinViewController"];
-    [mainWindow.rootViewController presentViewController:mPinViewController animated:YES completion:nil];
+    [mainWindow setRootViewController:mPinViewController];
     [mainWindow makeKeyAndVisible];
 }
 
@@ -80,7 +80,7 @@ static SharedManager *singleTonManager;
     
     //navigationController = [[UINavigationController alloc] initWithRootViewController:tabBarController];
     
-    [mainWindow.rootViewController presentViewController:tabBarController animated:YES completion:nil];
+    [mainWindow setRootViewController:tabBarController];
     [mainWindow makeKeyAndVisible];
 }
 

@@ -8,6 +8,10 @@
 
 #import "SchoolsViewController.h"
 #import "Constants.h"
+#import "ProgressHUD.h"
+#import "ServiceModel.h"
+#import "Parse.h"
+#import "AppDelegate.h"
 
 @interface SchoolsViewController ()
 {
@@ -25,8 +29,11 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     
+    appDelegate = [[UIApplication sharedApplication] delegate];
     schoolsArray = [[NSMutableArray alloc] init];
     //[schoolsArray addObject:@"school"];
+    
+    [self fetchSchoolsList];
     
     NSString * storyboardName = @"Main";
     storyboard = [UIStoryboard storyboardWithName:storyboardName bundle: nil];
@@ -47,6 +54,26 @@
     }
 }
 
+/**
+ * Fetching schools list added by parent
+ */
+- (void)fetchSchoolsList{
+    [[ProgressHUD sharedProgressHUD] showActivityIndicatorOnView:self.view];
+    [ServiceModel makeGetRequestFor:SchoolsList WithInputParams:[NSString stringWithFormat:@"userRef=%@&requestedon=%@&requestedfrom=%@&guid=%@&parentUserRef=%@",[[NSUserDefaults standardUserDefaults] objectForKey:@"UserRef"],[appDelegate getStringFromDate:[NSDate date] withFormat:@"dd-MM-yyyy%20hh:mm:ss"],@"Mobile",[appDelegate getUUID],[[NSUserDefaults standardUserDefaults] objectForKey:@"UserRef"]] MakeHttpRequest:^(NSDictionary *response, NSError *error){
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [[ProgressHUD sharedProgressHUD] removeHUD];
+            if (!error) {
+                NSLog(@" Response  : %@", response);
+                schoolsArray = (NSMutableArray *)[[Parse sharedParse] parseSchoolsListResponse:[response objectForKey:@"body"]];
+                [self chooseContentView];
+            }else{
+                NSLog(@" Error : %@", error.localizedDescription);
+            }
+            
+        });
+    }];
+}
+
 - (void)showSchoolsListView{
     //[self removeAndReloadView];
     if (!schoolsListViewController) {
@@ -55,7 +82,7 @@
     }
     [schoolsListViewController.view setFrame:self.containerView.bounds];
     [schoolsListViewController setSchoolsArray:schoolsArray];
-    
+    [schoolsListViewController updateSchoolsList];
     [self.containerView addSubview:schoolsListViewController.view];
 }
 
@@ -71,18 +98,20 @@
 }
 
 - (void)removeAndReloadView{
-    
-    if (_containerView) {
-        //[_containerView];
-        //_controllerView = nil;
+    NSArray *viewsToRemove = [self.containerView subviews];
+    if (viewsToRemove.count > 0) {
+        for (UIView *v in viewsToRemove) {
+            [v removeFromSuperview];
+        }
+    }else{
+        return;
     }
+    
 }
 
 #pragma -mark AddSchoolViewControllerProtocol methods
 - (void)didSchoolAdded{
-    [schoolsArray addObject:@"school"];
-    [self chooseContentView];
-    [schoolsListViewController updateSchoolsList];
+    [self fetchSchoolsList];
 }
 
 #pragma -mark SchoolsListViewControllerProtocol methods

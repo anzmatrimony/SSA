@@ -7,9 +7,13 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "ObjectManager.h"
 
 @interface SchoolsListTableViewCell : UITableViewCell
 
 @property (nonatomic, weak) IBOutlet UIImageView *schoolImageView;
 @property (nonatomic, weak) IBOutlet UIView *dataView;
+@property (nonatomic, weak) IBOutlet UILabel *schoolNameLabel,*schoolAddressLabel;
+
+- (void)updateData:(SCHOOL_MODEL *)school;
 @end

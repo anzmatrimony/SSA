@@ -10,6 +10,7 @@
 #import "AppDelegate.h"
 #import "Constants.h"
 #import "AlertMessage.h"
+#import "SharedManager.h"
 
 @interface LoginViewController (){
     UITextField *activeTextField;
@@ -20,6 +21,8 @@
 @property (nonatomic, weak) IBOutlet NSLayoutConstraint *userNameFieldHeight,*passwordTextFieldHeight;
 @property (nonatomic, weak) IBOutlet UIButton *rememberMeCheckBoxButton;
 - (IBAction)loginAction:(id)sender;
+- (IBAction)rememberMeAction:(id)sender;
+- (IBAction)forgotPasswordAction:(id)sender;
 
 @end
 
@@ -63,25 +66,35 @@
 
 - (IBAction)rememberMeAction:(id)sender{
     if (isRememberMeSelected) {
-        [_rememberMeCheckBoxButton setImage:[UIImage imageNamed:@""] forState:UIControlStateNormal];
+        [_rememberMeCheckBoxButton setImage:[UIImage imageNamed:@"black-check-box.png"] forState:UIControlStateNormal];
     }else{
-        [_rememberMeCheckBoxButton setImage:[UIImage imageNamed:@""] forState:UIControlStateNormal];
+        [_rememberMeCheckBoxButton setImage:[UIImage imageNamed:@"check-box.png"] forState:UIControlStateNormal];
     }
     isRememberMeSelected = !isRememberMeSelected;
 }
 - (IBAction)loginAction:(id)sender{
     if ([self doValidation]) {
-        
+        if ([_userNameField.text isEqualToString:[[NSUserDefaults standardUserDefaults] objectForKey:@"UserName"]] && [_passwordField.text isEqualToString:[[NSUserDefaults standardUserDefaults] objectForKey:@"Password"]]) {
+            [[NSUserDefaults standardUserDefaults] setObject:@"InProcess" forKey:@"LoginStatus"];
+            NSLog(@" Login Status : %@",[[NSUserDefaults standardUserDefaults] objectForKey:@"LoginStatus"]);
+            [[SharedManager sharedManager] showMPinScreen];
+        }else{
+            [[AlertMessage sharedAlert] showAlertWithMessage:@"Invalid credentials" withDelegate:nil onViewController:self];
+        }
     }
+}
+
+- (IBAction)forgotPasswordAction:(id)sender{
+    // show forgot password screen
 }
 
 // Validating user inputs
 - (BOOL)doValidation{
     if (_userNameField.text.length == 0 || _passwordField.text.length == 0) {
-        [[AlertMessage sharedAlert] showAlertWithMessage:AlertTitle withDelegate:@"Please fill all the fields" onViewController:self];
-        return YES;
+        [[AlertMessage sharedAlert] showAlertWithMessage:@"Please fill all the fields" withDelegate:nil onViewController:self];
+        return false;
     }
-    return false;
+    return true;
 }
 #pragma mark - UITextField Delegate Methods
 - (void)textFieldDidBeginEditing:(UITextField *)textField{

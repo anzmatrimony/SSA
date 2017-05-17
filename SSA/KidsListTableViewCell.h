@@ -7,10 +7,15 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "ObjectManager.h"
 
 @interface KidsListTableViewCell : UITableViewCell
 
 @property (nonatomic, weak) IBOutlet UIImageView *kidImageView;
 @property (nonatomic, weak) IBOutlet UIView *dataView;
+@property (nonatomic, weak) IBOutlet UILabel *kidNameLabel,*schoolNameLabel;
+
+- (void)updateCellWithData:(KID_MODEL *)kid;
+
 
 @end

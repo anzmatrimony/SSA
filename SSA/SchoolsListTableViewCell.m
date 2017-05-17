@@ -27,4 +27,8 @@
     // Configure the view for the selected state
 }
 
+- (void)updateData:(SCHOOL_MODEL *)school{
+    [_schoolNameLabel setText:school.SchoolName];
+    [_schoolAddressLabel setText:school.createdOn];
+}
 @end

@@ -7,6 +7,7 @@
 //
 
 #import "SchoolsListViewController.h"
+#import "ObjectManager.h"
 
 @interface SchoolsListViewController ()
 
@@ -44,7 +45,8 @@
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath{
     SchoolsListTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"SchoolsListTableViewCell"];
-    
+    SCHOOL_MODEL *school =  [self.schoolsArray objectAtIndex:indexPath.row];
+    [cell updateData:school];
     return cell;
 }
 
@@ -58,5 +60,17 @@
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath{
     
+}
+
+- (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath {
+    // Return YES if you want the specified item to be editable.
+    return YES;
+}
+
+// Override to support editing the table view.
+- (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
+    if (editingStyle == UITableViewCellEditingStyleDelete) {
+        //add code here for when you hit delete
+    }
 }
 @end

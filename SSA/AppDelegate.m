@@ -20,8 +20,10 @@
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     
     // Applying color to navigation bar and navigation bar title
-    [[UINavigationBar appearance] setBarTintColor:COLOR(0, 103, 137)];
+    [[UINavigationBar appearance] setBarTintColor:COLOR(42, 103, 130)];
     [[UINavigationBar appearance] setTintColor:[UIColor whiteColor]];
+    
+    self.currentLocation = @"";
     
     /*[[UINavigationBar appearance] setShadowImage:[UIImage new]];
     // is IOS 7 and later
@@ -32,13 +34,11 @@
     // Changing status bar text color to Light(White)
     [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleLightContent];
     
-    // Show starting screen based on the condition
-    [[SharedManager sharedManager] showLoginScreen];
     return YES;
 }
 
 - (void)customizeTabBarAppearance{
-    UIColor *backgroundColor = COLOR(0, 103, 137);
+    UIColor *backgroundColor = COLOR(42, 103, 130);
     // set the bar background color
     [[UITabBar appearance] setBackgroundImage:[AppDelegate imageFromColor:backgroundColor forSize:CGSizeMake([[UIScreen mainScreen] bounds].size.width, 49) withCornerRadius:0]];
     // set the text color for selected state
@@ -52,6 +52,8 @@
     [[UITabBar appearance] setShadowImage:nil];
     // Set the dark color to selected tab (the dimmed background)
     [[UITabBar appearance] setSelectionIndicatorImage:[AppDelegate imageFromColor:COLOR(51, 51, 51) forSize:CGSizeMake([UIScreen mainScreen].bounds.size.width / 4, 49) withCornerRadius:0]];
+    
+    
 }
 
 - (void)applicationWillResignActive:(UIApplication *)application {
@@ -113,7 +115,7 @@
 
 - (UIView *) leftViewForTextfiledWithImage:(NSString *)imageName withCornerRadius:(NSArray *)cornersList{
     UIView *leftView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, TextFieldHeight, TextFieldHeight)];
-    [leftView setBackgroundColor:COLOR(0, 103, 137)];
+    [leftView setBackgroundColor:COLOR(42, 103, 130)];
     UIImageView *imageView = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, TextFieldHeight - 15, TextFieldHeight - 15)];
     [imageView setImage:[UIImage imageNamed:imageName]];
     imageView.center = leftView.center;
@@ -145,5 +147,64 @@
         
         view.layer.mask = maskLayer;
     }
+}
+
+/*!
+ * @discussion Generating JSON formatted data from NSDictionary
+ * @return JSON formatted string as a NSData object
+ */
+- (NSData *)getJsonFormatedStringFrom:(NSMutableDictionary *)paramsDict{
+    NSData *jsonData;
+    NSError *error;
+    
+    jsonData = [NSJSONSerialization dataWithJSONObject:paramsDict
+                                               options:NSJSONWritingPrettyPrinted // Pass 0 if you don't care about the readability of the generated string
+                                                 error:&error];
+    
+    return jsonData;
+}
+
+- (NSString *)getUUID{
+    return [[NSUUID UUID] UUIDString];
+}
+
+/**
+ * @Discussion Getting string from date with desired format
+ * @Param date as NSDate object
+ * @Param dateFormat as NSString object
+ * @Return NSString object
+ */
+- (NSString *)getStringFromDate:(NSDate *)date withFormat:(NSString *)dateFormat{
+    NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
+    [formatter setDateFormat:dateFormat];
+    
+    NSDate *currentDate = date;
+    NSString *dateString = [formatter stringFromDate:currentDate];
+    return dateString;
+}
+
+/**
+ * @Discussion Initializing location manager to get user current location
+ */
+- (void)initializeLocationManager{
+    if (locationManager == nil) {
+        locationManager = [[CLLocationManager alloc] init];
+        locationManager.delegate = self;
+        locationManager.distanceFilter = kCLDistanceFilterNone;
+        locationManager.desiredAccuracy = kCLLocationAccuracyBest;
+    }
+    if ([[[UIDevice currentDevice] systemVersion] floatValue] >= 8.0)
+        [locationManager requestWhenInUseAuthorization];
+    [locationManager startUpdatingLocation];
+}
+
+#pragma Mark CLLocationManagerDelegate Methods
+- (void)locationManager:(CLLocationManager *)manager didUpdateLocations:(NSArray *)locations
+{
+    self.currentLocation = [NSString stringWithFormat:@"%f,%f",[[locations objectAtIndex:0] coordinate].latitude,[[locations objectAtIndex:0] coordinate].latitude];
+}
+
+- (void)locationManager:(CLLocationManager *)manager didFailWithError:(NSError *)error{
+    self.currentLocation = @"";
 }
 @end
