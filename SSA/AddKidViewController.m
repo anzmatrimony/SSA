@@ -14,8 +14,9 @@
 #import "AppDelegate.h"
 #import "AlertMessage.h"
 #import "ObjectManager.h"
+#import "SharedManager.h"
 
-@interface AddKidViewController (){
+@interface AddKidViewController ()<AlertMessageDelegateProtocol>{
     UITextField *activeTextField;
     NSString *selectedSchool,*selectedClass,*selectedSection,*selectedRelation;
     NSArray *classListArray,*sectionsListArray,*relationShipListArray;
@@ -78,7 +79,7 @@
  */
 - (void)fetchSchoolsList{
     [[ProgressHUD sharedProgressHUD] showActivityIndicatorOnView:self.view];
-    [ServiceModel makeGetRequestFor:SchoolsList WithInputParams:[NSString stringWithFormat:@"userRef=%@&requestedon=%@&requestedfrom=%@&guid=%@&parentUserRef=%@",[[NSUserDefaults standardUserDefaults] objectForKey:@"UserRef"],[appDelegate getStringFromDate:[NSDate date] withFormat:@"dd-MM-yyyy%20hh:mm:ss"],@"Mobile",[appDelegate getUUID],[[NSUserDefaults standardUserDefaults] objectForKey:@"UserRef"]] MakeHttpRequest:^(NSDictionary *response, NSError *error){
+    [ServiceModel makeGetRequestFor:SchoolsList WithInputParams:[NSString stringWithFormat:@"userRef=%@&requestedon=%@&requestedfrom=%@&guid=%@&parentUserRef=%@&geolocation=%@",[[NSUserDefaults standardUserDefaults] objectForKey:UserRef],[appDelegate getStringFromDate:[NSDate date] withFormat:@"dd-MM-yyyy%20hh:mm:ss"],@"Mobile",[appDelegate getUUID],[[NSUserDefaults standardUserDefaults] objectForKey:UserRef], [appDelegate currentLocation]]  AndToken:[[NSUserDefaults standardUserDefaults] objectForKey:AccessToken] MakeHttpRequest:^(NSDictionary *response, NSError *error){
         dispatch_async(dispatch_get_main_queue(), ^{
             [[ProgressHUD sharedProgressHUD] removeHUD];
             if (!error) {
@@ -88,6 +89,11 @@
                     [[AlertMessage sharedAlert] showAlertWithMessage:@"Please register atleast one school to add kid" withDelegate:nil onViewController:self];
                 }
             }else{
+                if ([error.localizedDescription isEqualToString:TokenExpiredString]) {
+                    [[AlertMessage sharedAlert] showAlertWithMessage:@"Session expired. Please login once again." withDelegate:self onViewController:self];
+                }else{
+                    [[AlertMessage sharedAlert] showAlertWithMessage:error.localizedDescription withDelegate:nil onViewController:self];
+                }
                 NSLog(@" Error : %@", error.localizedDescription);
             }
             
@@ -104,7 +110,7 @@
         NSMutableDictionary *headersDict = [[NSMutableDictionary alloc] init];
         [headersDict setObject:@"Mobile" forKey:@"requestedfrom"];
         [headersDict setObject:[appDelegate getUUID] forKey:@"guid"];
-        [headersDict setObject:[[NSUserDefaults standardUserDefaults] objectForKey:@"UserRef"] forKey:@"userRef"];
+        [headersDict setObject:[[NSUserDefaults standardUserDefaults] objectForKey:UserRef] forKey:@"userRef"];
         [headersDict setObject:[appDelegate currentLocation] forKey:@"geolocation"];
         [mainDict setObject:headersDict forKey:@"header"];
         
@@ -118,17 +124,26 @@
         [bodyDict setObject:@"Pending" forKey:@"kidstatus"];
         [bodyDict setObject:selectedRelation forKey:@"createdBy"];
         [bodyDict setObject:[appDelegate getStringFromDate:[NSDate date] withFormat:@"dd-MM-yyyy%20HH:MM:SS"] forKey:@"createdOn"];
-        [bodyDict setObject:[[NSUserDefaults standardUserDefaults] objectForKey:@"UserRef"] forKey:@"parentUserRef"];
+        [bodyDict setObject:[[NSUserDefaults standardUserDefaults] objectForKey:UserRef] forKey:@"parentUserRef"];
         
         [mainDict setObject:bodyDict forKey:@"body"];
         [[ProgressHUD sharedProgressHUD] showActivityIndicatorOnView:self.view];
         
-        [ServiceModel makeRequestFor:KidRegistration WithInputParams:[appDelegate getJsonFormatedStringFrom:mainDict] MakeHttpRequest:^(NSDictionary *response, NSError *error){
+        [ServiceModel makeRequestFor:KidRegistration WithInputParams:[appDelegate getJsonFormatedStringFrom:mainDict] AndToken:[[NSUserDefaults standardUserDefaults] objectForKey:AccessToken] MakeHttpRequest:^(NSDictionary *response, NSError *error){
             dispatch_async(dispatch_get_main_queue(), ^{
                 [[ProgressHUD sharedProgressHUD] removeHUD];
                 if (!error) {
+                    if ([[response objectForKey:@"body"] objectForKey:@"fmessage"]) {
+                        [[AlertMessage sharedAlert] showAlertWithMessage:[[response objectForKey:@"body"] objectForKey:@"fmessage"] withDelegate:nil onViewController:self];
+                        return ;
+                    }
                     [self moveToPreviousScreen];
                 }else{
+                    if ([error.localizedDescription isEqualToString:TokenExpiredString]) {
+                        [[AlertMessage sharedAlert] showAlertWithMessage:@"Session expired. Please login once again." withDelegate:self onViewController:self];
+                    }else{
+                        [[AlertMessage sharedAlert] showAlertWithMessage:error.localizedDescription withDelegate:nil onViewController:self];
+                    }
                     NSLog(@" Error : %@", error.localizedDescription);
                 }
                 
@@ -279,5 +294,11 @@
 - (void)updateSelectedSchool:(SCHOOL_MODEL *)schoolModel{
     selectedSchool = schoolModel.SchoolUniqueId;
     [_schoolButton setTitle:schoolModel.SchoolName forState:UIControlStateNormal];
+}
+
+#pragma mark AlertMessageDelegateProtocol methods
+- (void)clickedOkButton{
+    [[SharedManager sharedManager] logoutTheUser];
+    [[SharedManager sharedManager] showLoginScreen];
 }
 @end

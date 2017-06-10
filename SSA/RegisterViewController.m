@@ -18,6 +18,7 @@
     UITextField *activeTextField;
     BOOL isAgreedToTermsAndConditions;
     BOOL isGenderMale;
+    BOOL isEmailValidated;
 }
 
 @property (nonatomic, weak) IBOutlet UITextField *firstNameField,*lastNameField,*emailField,*passwordFiedl,*confirmPasswordField,*phoneNumberField;
@@ -39,6 +40,7 @@
     
     [appDelegate initializeLocationManager];
     isAgreedToTermsAndConditions = false;
+    isEmailValidated = false;
     
     // By default selecting Male option for gender
     isGenderMale = true;
@@ -50,7 +52,7 @@
     
     [_emailField setLeftView: [appDelegate leftViewForTextfiledWithImage:@"email.png" withCornerRadius:nil]];
     
-    [_phoneNumberField setLeftView: [appDelegate leftViewForTextfiledWithImage:@"email.png" withCornerRadius:nil]];
+    [_phoneNumberField setLeftView: [appDelegate leftViewForTextfiledWithImage:@"mobile.png" withCornerRadius:nil]];
     
     [_passwordFiedl setLeftView: [appDelegate leftViewForTextfiledWithImage:@"pswd.png" withCornerRadius:nil]];
     
@@ -207,7 +209,8 @@
 
 - (IBAction)registerAction:(id)sender{
     if ([self doValidation]) {
-        [self registerParent];
+        //[self getAccessToken];
+        [self registerParentWithToken:[[NSUserDefaults standardUserDefaults] objectForKey:AccessToken]];
     }
 }
 
@@ -242,6 +245,9 @@
     }else if(![self isValidEmail]){
         [[AlertMessage sharedAlert] showAlertWithMessage:@"Please enter valid email address" withDelegate:nil onViewController:self];
         return NO;
+    }else if(!isEmailValidated){
+        [[AlertMessage sharedAlert] showAlertWithMessage:@"EmailID already exist. Please try another." withDelegate:nil onViewController:self];
+        return NO;
     }
     return YES;
 }
@@ -259,7 +265,8 @@
     return [emailTest evaluateWithObject:_emailField.text];
 }
 
-- (void)registerParent{
+- (void)registerParentWithToken:(NSString *)token{
+    
     [[ProgressHUD sharedProgressHUD] showActivityIndicatorOnView:self.view];
     NSMutableDictionary *mainDict = [[NSMutableDictionary alloc] init];
     NSMutableDictionary *headersDict = [[NSMutableDictionary alloc] init];
@@ -279,35 +286,11 @@
     [bodyDict setObject:isGenderMale?@"Male":@"Female" forKey:@"Gender"];
     [mainDict setObject:bodyDict forKey:@"body"];
     
-    /*NSMutableDictionary *mainDict = [[NSMutableDictionary alloc] init];
-    NSMutableDictionary *headersDict = [[NSMutableDictionary alloc] init];
-    [headersDict setObject:@"website" forKey:@"requestedfrom"];
-    [headersDict setObject:@"dummy" forKey:@"guid"];
-    [headersDict setObject:@"anonymous" forKey:@"userRef"];
-    [headersDict setObject:@"anonymous" forKey:@"geolocation"];
-    [mainDict setObject:headersDict forKey:@"header"];
-    
-    NSMutableDictionary *bodyDict = [[NSMutableDictionary alloc] init];
-    [bodyDict setObject:@"LKG" forKey:@"classe"];
-    [bodyDict setObject:@"Gnanendra Kumar" forKey:@"firstName"];
-    [bodyDict setObject:@"Gnanendra Kumar" forKey:@"lastName"];
-    [bodyDict setObject:@"A" forKey:@"section"];
-    [bodyDict setObject:@"RequelFord" forKey:@"SchoolName"];
-    [bodyDict setObject:@"getthegenerated" forKey:@"SchoolUniqueId"];
-    [bodyDict setObject:@"pending" forKey:@"kidstatus"];
-    [bodyDict setObject:@"parent" forKey:@"createdBy"];
-    [bodyDict setObject:@"TimeStamp" forKey:@"createdOn"];
-    [bodyDict setObject:@"getfromparentData" forKey:@"parentUserRef"];
-    [mainDict setObject:bodyDict forKey:@"body"];*/
-    
-    [ServiceModel makeRequestFor:ParentRegistration WithInputParams:[appDelegate getJsonFormatedStringFrom:mainDict] MakeHttpRequest:^(NSDictionary *response, NSError *error){
+    [ServiceModel makeRequestFor:ParentRegistration WithInputParams:[appDelegate getJsonFormatedStringFrom:mainDict] AndToken:token MakeHttpRequest:^(NSDictionary *response, NSError *error){
         dispatch_async(dispatch_get_main_queue(), ^{
             [[ProgressHUD sharedProgressHUD] removeHUD];
             if (!error) {
                 if ([[response objectForKey:@"body"] objectForKey:@"message"]) {
-                    [[NSUserDefaults standardUserDefaults] setObject:_emailField.text forKey:@"UserName"];
-                    [[NSUserDefaults standardUserDefaults] setObject:_passwordFiedl.text forKey:@"Password"];
-                    [[NSUserDefaults standardUserDefaults] setObject:[NSString stringWithFormat:@"%@%@",[[_emailField.text componentsSeparatedByString:@"@"] objectAtIndex:0],TimeStamp] forKey:@"UserRef"];
                     
                     NSLog(@" Message %@", [[response objectForKey:@"body"] objectForKey:@"message"]);
                     [self.navigationController popToRootViewControllerAnimated:YES];
@@ -320,11 +303,66 @@
         });
     }];
 }
+
+/**
+ *@discussion getting access token for registration
+ */
+- (void)getAccessToken{
+    [[ProgressHUD sharedProgressHUD] showActivityIndicatorOnView:self.view];
+    [ServiceModel GetAccessTokenWithOutPassword:^(NSDictionary *response, NSError *error){
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [[ProgressHUD sharedProgressHUD] removeHUD];
+            if (!error) {
+                if ([response objectForKey:@"access_token"]) {
+                    [self checkEmailExistence];
+                    //[self registerParentWithToken:[response objectForKey:@"access_token"]];
+                    [[NSUserDefaults standardUserDefaults] setObject:[response objectForKey:@"access_token"] forKey:AccessToken];
+                }else{
+                    [[AlertMessage sharedAlert] showAlertWithMessage:@"Some thing went wrong. Please try again later." withDelegate:nil onViewController:self];
+                }
+                
+            }else{
+                [[AlertMessage sharedAlert] showAlertWithMessage:error.localizedDescription withDelegate:nil onViewController:self];
+            }
+        });
+    }];
+}
+
+/**
+ *@discussion checking entered email address available or not
+ */
+- (void)checkEmailExistence{
+    
+    [[ProgressHUD sharedProgressHUD] showActivityIndicatorOnView:self.view];
+    [ServiceModel makeGetRequestFor:ValidateEmail WithInputParams:[NSString stringWithFormat:@"requestedon=%@&requestedfrom=%@&guid=%@&emailID=%@&geolocation=%@",[appDelegate getStringFromDate:[NSDate date] withFormat:@"dd-MM-yyyy%20hh:mm:ss"],@"Mobile",[appDelegate getUUID],_emailField.text, [appDelegate currentLocation]] AndToken:[[NSUserDefaults standardUserDefaults] objectForKey:AccessToken] MakeHttpRequest:^(NSDictionary *response, NSError *error){
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [[ProgressHUD sharedProgressHUD] removeHUD];
+            if (!error) {
+                NSLog(@"email validdatio response %@", response);
+                if ([response objectForKey:@"result"]) {
+                    isEmailValidated = false;
+                    [[AlertMessage sharedAlert] showAlertWithMessage:@"EmailID already exist. Please try another." withDelegate:nil onViewController:self];
+                   
+                }else{
+                    isEmailValidated = true;
+                }
+                
+            }else{
+                [[AlertMessage sharedAlert] showAlertWithMessage:error.localizedDescription withDelegate:nil onViewController:self];
+            }
+        });
+    }];
+
+}
 #pragma mark - UITextField Delegate Methods
 - (void)textFieldDidBeginEditing:(UITextField *)textField{
     activeTextField = textField;
 }
 - (void)textFieldDidEndEditing:(UITextField *)textField{
+    if (textField.tag == 100) {
+        [textField resignFirstResponder];
+        [self getAccessToken];
+    }
     activeTextField = nil;
 }
 - (BOOL)textFieldShouldReturn:(UITextField *)textField{

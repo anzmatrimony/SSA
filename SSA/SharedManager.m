@@ -10,6 +10,8 @@
 #import "AppDelegate.h"
 #import "LoginViewController.h"
 #import "MpinViewController.h"
+#import "EnterPinViewController.h"
+#import "Constants.h"
 
 @implementation SharedManager{
     UIViewController *viewController;
@@ -17,6 +19,7 @@
     UITabBarController *tabBarController;
     UINavigationController *navigationController;
     MpinViewController *mPinViewController;
+    EnterPinViewController *enterPinViewController;
 }
 
 static SharedManager *singleTonManager;
@@ -65,6 +68,22 @@ static SharedManager *singleTonManager;
     [mainWindow makeKeyAndVisible];
 }
 
+- (void)showEnterMPinScreen{
+    if (enterPinViewController) {
+        enterPinViewController = nil;
+    }
+    if(navigationController){
+        navigationController = nil;
+    }
+    
+    UIWindow *mainWindow = [[[UIApplication sharedApplication] delegate] window];
+    NSString * storyboardName = @"Main";
+    UIStoryboard *storyboard = [UIStoryboard storyboardWithName:storyboardName bundle: nil];
+    enterPinViewController = [storyboard instantiateViewControllerWithIdentifier:@"EnterPinViewController"];
+    [mainWindow setRootViewController:enterPinViewController];
+    [mainWindow makeKeyAndVisible];
+}
+
 - (void)showHomeScreen{
     if (tabBarController) {
         tabBarController = nil;
@@ -84,4 +103,12 @@ static SharedManager *singleTonManager;
     [mainWindow makeKeyAndVisible];
 }
 
+- (void)logoutTheUser{
+    [[NSUserDefaults standardUserDefaults] removeObjectForKey:LoginStatus];
+    [[NSUserDefaults standardUserDefaults] removeObjectForKey:UserRef];
+    [[NSUserDefaults standardUserDefaults] removeObjectForKey:AccessToken];
+    [[NSUserDefaults standardUserDefaults] removeObjectForKey:MPIN];
+    [[NSUserDefaults standardUserDefaults] removeObjectForKey:UserStatus];
+    [[NSUserDefaults standardUserDefaults] removeObjectForKey:Role];
+}
 @end

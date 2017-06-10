@@ -49,12 +49,12 @@
     
     NSMutableArray *mpinfiledLeftViewCornersArray1 = [[NSMutableArray alloc] init];
     [mpinfiledLeftViewCornersArray1 addObject:[NSNumber numberWithInteger:UIRectCornerTopLeft]];
-    _mpinTextField.leftView = [appDelegate leftViewForTextfiledWithImage:@"Person.png" withCornerRadius:mpinfiledLeftViewCornersArray1];
+    _mpinTextField.leftView = [appDelegate leftViewForTextfiledWithImage:@"setpin.png" withCornerRadius:mpinfiledLeftViewCornersArray1];
     _mpinTextField.leftViewMode = UITextFieldViewModeAlways;
     
     NSMutableArray *confirmMpinFeldLeftViewCornersArray1 = [[NSMutableArray alloc] init];
     [confirmMpinFeldLeftViewCornersArray1 addObject:[NSNumber numberWithInteger:UIRectCornerBottomLeft]];
-    _confirmMpinTextField.leftView = [appDelegate leftViewForTextfiledWithImage:@"Person.png" withCornerRadius:confirmMpinFeldLeftViewCornersArray1];
+    _confirmMpinTextField.leftView = [appDelegate leftViewForTextfiledWithImage:@"confirm-setpin.png" withCornerRadius:confirmMpinFeldLeftViewCornersArray1];
     _confirmMpinTextField.leftViewMode = UITextFieldViewModeAlways;
 }
 
@@ -62,7 +62,7 @@
     if ([self doValidation]) {
         NSLog(@" Login Status : %@",[[NSUserDefaults standardUserDefaults] objectForKey:@"LoginStatus"]);
         if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"LoginStatus"] isEqualToString:@"InProcess"]) {
-            [[NSUserDefaults standardUserDefaults] setObject:_mpinTextField.text forKey:@"MPIN"];
+            [[NSUserDefaults standardUserDefaults] setObject:_mpinTextField.text forKey:MPIN];
             [[NSUserDefaults standardUserDefaults] setObject:@"Success" forKey:@"LoginStatus"];
             [[SharedManager sharedManager] showHomeScreen];
         }else{

@@ -9,21 +9,27 @@
 #import "AppDelegate.h"
 #import "Constants.h"
 #import "SharedManager.h"
+#import <LocalAuthentication/LocalAuthentication.h>
+#import "THPinViewController.h"
 
-@interface AppDelegate ()
-
+@interface AppDelegate ()<THPinViewControllerDelegate>
+@property (nonatomic, copy) NSString *correctPin;
+@property (nonatomic, assign) NSUInteger remainingPinEntries;
 @end
+
+static const NSUInteger THNumberOfPinEntries = 6;
 
 @implementation AppDelegate
 
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     
+    [self initializeLocationManager];
     // Applying color to navigation bar and navigation bar title
     [[UINavigationBar appearance] setBarTintColor:COLOR(42, 103, 130)];
     [[UINavigationBar appearance] setTintColor:[UIColor whiteColor]];
     
-    self.currentLocation = @"";
+    self.currentLocation = @"0.0,0.0";
     
     /*[[UINavigationBar appearance] setShadowImage:[UIImage new]];
     // is IOS 7 and later
@@ -63,18 +69,35 @@
 
 
 - (void)applicationDidEnterBackground:(UIApplication *)application {
+    [[NSUserDefaults standardUserDefaults] setBool:true forKey:IsTouchIdRequired];
     // Use this method to release shared resources, save user data, invalidate timers, and store enough application state information to restore your application to its current state in case it is terminated later.
     // If your application supports background execution, this method is called instead of applicationWillTerminate: when the user quits.
 }
 
 
 - (void)applicationWillEnterForeground:(UIApplication *)application {
+    if ([[[NSUserDefaults standardUserDefaults] objectForKey:LoginStatus] isEqualToString:@"Success"]) {
+        self.correctPin = [[NSUserDefaults standardUserDefaults] objectForKey:MPIN];
+        //[self showPinViewAnimated:YES];
+        if ([self isTouchIDAvailable]) {
+            [self showTouchIdAlert];
+        }else{
+            [self showPinViewAnimated:YES];
+        }
+        
+    }
+    
     // Called as part of the transition from the background to the active state; here you can undo many of the changes made on entering the background.
 }
 
 
 - (void)applicationDidBecomeActive:(UIApplication *)application {
     // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
+    
+    
+    /*if ([[NSUserDefaults standardUserDefaults] boolForKey:IsTouchIdRequired]) {
+        [self showTouchIdAlert];
+    }*/
 }
 
 
@@ -165,7 +188,23 @@
 }
 
 - (NSString *)getUUID{
-    return [[NSUUID UUID] UUIDString];
+    
+    // String lenght should be 10
+    NSMutableString *returnString = [NSMutableString stringWithCapacity:10];
+        
+    NSString *numbers = @"0123456789";
+        
+    // First number cannot be 0
+    [returnString appendFormat:@"%C", [numbers characterAtIndex:(arc4random() % ([numbers length]-1))+1]];
+        
+    for (int i = 1; i < 10; i++)
+    {
+        [returnString appendFormat:@"%C", [numbers characterAtIndex:arc4random() % [numbers length]]];
+    }
+        
+    return returnString;
+    
+    //return [[NSUUID UUID] UUIDString];
 }
 
 /**
@@ -205,6 +244,147 @@
 }
 
 - (void)locationManager:(CLLocationManager *)manager didFailWithError:(NSError *)error{
-    self.currentLocation = @"";
+    self.currentLocation = @"0.0,0.0";
 }
+
+/**
+ *@Discussion checking wether touch id enabled or not
+ */
+- (BOOL)isTouchIDAvailable{
+    if (SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"8.0")) {
+        return [[[LAContext alloc] init] canEvaluatePolicy:LAPolicyDeviceOwnerAuthenticationWithBiometrics error:nil];
+    }
+    return NO;
+}
+
+- (void)showTouchIdAlert{
+    LAContext *myContext = [[LAContext alloc] init];
+    NSError *authError = nil;
+    NSString *myLocalizedReasonString = @"Touch ID Test to secure your app";
+    
+    if ([myContext canEvaluatePolicy:LAPolicyDeviceOwnerAuthenticationWithBiometrics error:&authError]) {
+        [myContext evaluatePolicy:LAPolicyDeviceOwnerAuthenticationWithBiometrics
+                  localizedReason:myLocalizedReasonString
+                            reply:^(BOOL success, NSError *error) {
+                                if (success) {
+                                    dispatch_async(dispatch_get_main_queue(), ^{
+                                        [[NSUserDefaults standardUserDefaults] setBool:false forKey:IsTouchIdRequired];
+                                        [[SharedManager sharedManager] showHomeScreen];
+                                    });
+                                } else {
+                                    dispatch_async(dispatch_get_main_queue(), ^{
+                                        [self showPinViewAnimated:YES];
+                                    });
+                                    /*dispatch_async(dispatch_get_main_queue(), ^{
+                                        UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"Error"
+                                                                                            message:error.description
+                                                                                           delegate:self
+                                                                                  cancelButtonTitle:@"OK"
+                                                                                  otherButtonTitles:nil, nil];
+                                        [alertView show];
+                                        // Rather than show a UIAlert here, use the error to determine if you should push to a keypad for PIN entry.
+                                    });*/
+                                }
+                            }];
+    } else {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self showPinViewAnimated:YES];
+        });
+        /*dispatch_async(dispatch_get_main_queue(), ^{
+            UIAlertView *alertView = [[UIAlertView alloc] initWithTitle:@"Error"
+                                                                message:authError.description
+                                                               delegate:self
+                                                      cancelButtonTitle:@"OK"
+                                                      otherButtonTitles:nil, nil];
+            [alertView show];
+            // Rather than show a UIAlert here, use the error to determine if you should push to a keypad for PIN entry.
+        });*/
+    }
+}
+
+#pragma mark - UI
+
+- (void)showPinViewAnimated:(BOOL)animated
+{
+    THPinViewController *pinViewController = [[THPinViewController alloc] initWithDelegate:self];
+    pinViewController.promptTitle = @"Enter MPIN";
+    UIColor *darkBlueColor = COLOR(34, 160, 208);
+    pinViewController.promptColor = [UIColor whiteColor];
+    pinViewController.view.tintColor = [UIColor whiteColor];
+    
+    // for a solid background color, use this:
+    pinViewController.backgroundColor = darkBlueColor;
+    
+    pinViewController.disableCancel = true;
+    
+    //pinViewController.translucentBackground = YES;
+    
+    UIWindow *mainWindow = [[[UIApplication sharedApplication] delegate] window];
+    
+    UIViewController *controller = (UIViewController *)[mainWindow rootViewController];
+    
+    [controller presentViewController:pinViewController animated:YES completion:nil];
+}
+
+
+#pragma mark - THPinViewControllerDelegate
+
+- (NSUInteger)pinLengthForPinViewController:(THPinViewController *)pinViewController
+{
+    return 4;
+}
+
+- (BOOL)pinViewController:(THPinViewController *)pinViewController isPinValid:(NSString *)pin
+{
+    if ([pin isEqualToString:self.correctPin]) {
+        return YES;
+    } else {
+        self.remainingPinEntries--;
+        return NO;
+    }
+}
+
+- (BOOL)userCanRetryInPinViewController:(THPinViewController *)pinViewController
+{
+    return (self.remainingPinEntries > 0);
+}
+
+- (void)incorrectPinEnteredInPinViewController:(THPinViewController *)pinViewController
+{
+    if (self.remainingPinEntries > THNumberOfPinEntries / 2) {
+        return;
+    }
+    
+    UIAlertView *alert =
+    [[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Incorrect PIN", @"")
+                               message:(self.remainingPinEntries == 1 ?
+                                        @"You can try again once." :
+                                        [NSString stringWithFormat:@"You can try again %lu times.",
+                                         (unsigned long)self.remainingPinEntries])
+                              delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
+    [alert show];
+    
+}
+
+- (void)pinViewControllerWillDismissAfterPinEntryWasSuccessful:(THPinViewController *)pinViewController
+{
+    //[[SharedManager sharedManager] showHomeScreen];
+}
+
+- (void)pinViewControllerWillDismissAfterPinEntryWasUnsuccessful:(THPinViewController *)pinViewController
+{
+    
+}
+
+- (void)pinViewControllerWillDismissAfterPinEntryWasCancelled:(THPinViewController *)pinViewController
+{
+    
+}
+
+#pragma UIAlerViewDelegate Methods
+- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex{
+    NSLog(@" Selected button index %ld",(long)buttonIndex);
+    [self showPinViewAnimated:YES];
+}
+
 @end

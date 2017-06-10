@@ -79,7 +79,7 @@
  */
 - (void)fetchSchoolsList{
     [[ProgressHUD sharedProgressHUD] showActivityIndicatorOnView:self.view];
-    [ServiceModel makeGetRequestFor:SchoolsList WithInputParams:[NSString stringWithFormat:@"userRef=%@&requestedon=%@&requestedfrom=%@&guid=%@&parentUserRef=%@",[[NSUserDefaults standardUserDefaults] objectForKey:@"UserRef"],[appDelegate getStringFromDate:[NSDate date] withFormat:@"dd-MM-yyyy%20hh:mm:ss"],@"Mobile",[appDelegate getUUID],[[NSUserDefaults standardUserDefaults] objectForKey:@"UserRef"]] MakeHttpRequest:^(NSDictionary *response, NSError *error){
+    [ServiceModel makeGetRequestFor:SchoolsList WithInputParams:[NSString stringWithFormat:@"userRef=%@&requestedon=%@&requestedfrom=%@&guid=%@&parentUserRef=%@",[[NSUserDefaults standardUserDefaults] objectForKey:UserRef],[appDelegate getStringFromDate:[NSDate date] withFormat:@"dd-MM-yyyy%20hh:mm:ss"],@"Mobile",[appDelegate getUUID],[[NSUserDefaults standardUserDefaults] objectForKey:UserRef]] AndToken:[[NSUserDefaults standardUserDefaults] objectForKey:AccessToken] MakeHttpRequest:^(NSDictionary *response, NSError *error){
         dispatch_async(dispatch_get_main_queue(), ^{
             [[ProgressHUD sharedProgressHUD] removeHUD];
             if (!error) {
@@ -105,7 +105,7 @@
         NSMutableDictionary *headersDict = [[NSMutableDictionary alloc] init];
         [headersDict setObject:@"Mobile" forKey:@"requestedfrom"];
         [headersDict setObject:[appDelegate getUUID] forKey:@"guid"];
-        [headersDict setObject:[[NSUserDefaults standardUserDefaults] objectForKey:@"UserRef"] forKey:@"userRef"];
+        [headersDict setObject:[[NSUserDefaults standardUserDefaults] objectForKey:UserRef] forKey:@"userRef"];
         [headersDict setObject:[appDelegate currentLocation] forKey:@"geolocation"];
         [mainDict setObject:headersDict forKey:@"header"];
         
@@ -119,12 +119,12 @@
         [bodyDict setObject:@"Pending" forKey:@"kidstatus"];
         [bodyDict setObject:selectedRelation forKey:@"createdBy"];
         [bodyDict setObject:[appDelegate getStringFromDate:[NSDate date] withFormat:@"dd-MM-yyyy%20HH:MM:SS"] forKey:@"createdOn"];
-        [bodyDict setObject:[[NSUserDefaults standardUserDefaults] objectForKey:@"UserRef"] forKey:@"parentUserRef"];
+        [bodyDict setObject:[[NSUserDefaults standardUserDefaults] objectForKey:UserRef] forKey:@"parentUserRef"];
         
         [mainDict setObject:bodyDict forKey:@"body"];
         [[ProgressHUD sharedProgressHUD] showActivityIndicatorOnView:self.view];
         
-        [ServiceModel makeRequestFor:KidRegistration WithInputParams:[appDelegate getJsonFormatedStringFrom:mainDict] MakeHttpRequest:^(NSDictionary *response, NSError *error){
+        [ServiceModel makeRequestFor:KidRegistration WithInputParams:[appDelegate getJsonFormatedStringFrom:mainDict] AndToken:[[NSUserDefaults standardUserDefaults] objectForKey:AccessToken] MakeHttpRequest:^(NSDictionary *response, NSError *error){
             dispatch_async(dispatch_get_main_queue(), ^{
                 [[ProgressHUD sharedProgressHUD] removeHUD];
                 if (!error) {

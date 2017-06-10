@@ -9,8 +9,9 @@
 #import <UIKit/UIKit.h>
 #import "ActivitiesListViewController.h"
 #import "KidsInActivityViewController.h"
+#import "BaseViewController.h"
 
-@interface ActivitiesViewController : UIViewController
+@interface ActivitiesViewController : BaseViewController
 
 
 @end

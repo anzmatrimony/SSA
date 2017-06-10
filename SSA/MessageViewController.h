@@ -9,7 +9,8 @@
 #import <UIKit/UIKit.h>
 #import "MessagesListTableViewCell.h"
 #import "ActivitySectionHeaderView.h"
+#import "BaseViewController.h"
 
-@interface MessageViewController : UIViewController
+@interface MessageViewController : BaseViewController
 
 @end

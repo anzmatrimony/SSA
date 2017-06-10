@@ -10,10 +10,11 @@
 #import "KidsListViewController.h"
 #import "AddKidViewController.h"
 #import "NewKidViewController.h"
+#import "BaseViewController.h"
 
 @class AppDelegate;
 
-@interface KidsViewController : UIViewController<AddKidViewControllerProtocol,KidsListViewControllerProtocol>
+@interface KidsViewController : BaseViewController<AddKidViewControllerProtocol,KidsListViewControllerProtocol>
 {
     AppDelegate *appDelegate;
 }

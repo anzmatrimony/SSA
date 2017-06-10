@@ -7,9 +7,24 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		93016C351EEBEF3A00769B70 /* setpin@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 93016C321EEBEF3A00769B70 /* setpin@2x.png */; };
+		93016C361EEBEF3A00769B70 /* mobile@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 93016C331EEBEF3A00769B70 /* mobile@2x.png */; };
+		93016C371EEBEF3A00769B70 /* confirm-setpin@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 93016C341EEBEF3A00769B70 /* confirm-setpin@2x.png */; };
+		93016C391EEBF10E00769B70 /* kids-blue@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 93016C381EEBF10E00769B70 /* kids-blue@2x.png */; };
 		931053821EC9A8550032AFC5 /* NewKidViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 931053811EC9A8550032AFC5 /* NewKidViewController.m */; };
 		931053851EC9C25A0032AFC5 /* StartViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 931053841EC9C25A0032AFC5 /* StartViewController.m */; };
 		9346AB251EBF273B004B4396 /* Reachability.m in Sources */ = {isa = PBXBuildFile; fileRef = 9346AB241EBF273B004B4396 /* Reachability.m */; };
+		9360EAB01EE2D98000ABFAC2 /* EnterPinViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9360EAAF1EE2D97F00ABFAC2 /* EnterPinViewController.m */; };
+		9360EAC11EE2DA0C00ABFAC2 /* THPinInputCirclesView.m in Sources */ = {isa = PBXBuildFile; fileRef = 9360EAB31EE2DA0C00ABFAC2 /* THPinInputCirclesView.m */; };
+		9360EAC21EE2DA0C00ABFAC2 /* THPinInputCircleView.m in Sources */ = {isa = PBXBuildFile; fileRef = 9360EAB51EE2DA0C00ABFAC2 /* THPinInputCircleView.m */; };
+		9360EAC31EE2DA0C00ABFAC2 /* THPinNumButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 9360EAB71EE2DA0C00ABFAC2 /* THPinNumButton.m */; };
+		9360EAC41EE2DA0C00ABFAC2 /* THPinNumPadView.m in Sources */ = {isa = PBXBuildFile; fileRef = 9360EAB91EE2DA0C00ABFAC2 /* THPinNumPadView.m */; };
+		9360EAC51EE2DA0C00ABFAC2 /* THPinView.m in Sources */ = {isa = PBXBuildFile; fileRef = 9360EABB1EE2DA0C00ABFAC2 /* THPinView.m */; };
+		9360EAC61EE2DA0C00ABFAC2 /* THPinViewController.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 9360EABC1EE2DA0C00ABFAC2 /* THPinViewController.bundle */; };
+		9360EAC71EE2DA0C00ABFAC2 /* THPinViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9360EABE1EE2DA0C00ABFAC2 /* THPinViewController.m */; };
+		9360EAC81EE2DA0C00ABFAC2 /* UIImage+ImageEffects.m in Sources */ = {isa = PBXBuildFile; fileRef = 9360EAC01EE2DA0C00ABFAC2 /* UIImage+ImageEffects.m */; };
+		9360EACB1EE3D73700ABFAC2 /* LocalAuthentication.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9360EACA1EE3D73700ABFAC2 /* LocalAuthentication.framework */; };
+		9360EACE1EE6C5BD00ABFAC2 /* BaseViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9360EACD1EE6C5B900ABFAC2 /* BaseViewController.m */; };
 		936136C01EB4F99500ABC921 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 936136BF1EB4F99500ABC921 /* main.m */; };
 		936136C31EB4F99500ABC921 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 936136C21EB4F99500ABC921 /* AppDelegate.m */; };
 		936136C91EB4F99600ABC921 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 936136C71EB4F99600ABC921 /* Main.storyboard */; };
@@ -39,7 +54,6 @@
 		9364A1FA1EB8B4ED00337893 /* KidsInActivityViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 9364A1F91EB8B4ED00337893 /* KidsInActivityViewController.m */; };
 		9364A1FF1EB8B6BD00337893 /* schools-blue@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 9364A1FB1EB8B6BD00337893 /* schools-blue@2x.png */; };
 		9364A2001EB8B6BD00337893 /* messages-blue@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 9364A1FC1EB8B6BD00337893 /* messages-blue@2x.png */; };
-		9364A2011EB8B6BD00337893 /* kids-blue@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 9364A1FD1EB8B6BD00337893 /* kids-blue@2x.png */; };
 		9364A2021EB8B6BD00337893 /* activities-blue@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 9364A1FE1EB8B6BD00337893 /* activities-blue@2x.png */; };
 		9364A2101EBC977000337893 /* ServiceModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 9364A20F1EBC977000337893 /* ServiceModel.m */; };
 		9364A2131EBC978300337893 /* ProgressHUD.m in Sources */ = {isa = PBXBuildFile; fileRef = 9364A2121EBC978300337893 /* ProgressHUD.m */; };
@@ -79,6 +93,7 @@
 		93A9FD041EB7576500F49C5A /* ActivitySectionHeaderView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 93A9FD031EB7576500F49C5A /* ActivitySectionHeaderView.xib */; };
 		93A9FD071EB75EDE00F49C5A /* ActivitiesListTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 93A9FD061EB75EDE00F49C5A /* ActivitiesListTableViewCell.m */; };
 		93A9FD0A1EB7765C00F49C5A /* MessagesListTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 93A9FD091EB7765C00F49C5A /* MessagesListTableViewCell.m */; };
+		93B9B4DA1EE811E400DA9E2D /* checkIcon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 93B9B4D91EE811E400DA9E2D /* checkIcon@2x.png */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -99,12 +114,36 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		93016C321EEBEF3A00769B70 /* setpin@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "setpin@2x.png"; sourceTree = "<group>"; };
+		93016C331EEBEF3A00769B70 /* mobile@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "mobile@2x.png"; sourceTree = "<group>"; };
+		93016C341EEBEF3A00769B70 /* confirm-setpin@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "confirm-setpin@2x.png"; sourceTree = "<group>"; };
+		93016C381EEBF10E00769B70 /* kids-blue@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "kids-blue@2x.png"; sourceTree = "<group>"; };
 		931053801EC9A8540032AFC5 /* NewKidViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NewKidViewController.h; sourceTree = "<group>"; };
 		931053811EC9A8550032AFC5 /* NewKidViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NewKidViewController.m; sourceTree = "<group>"; };
 		931053831EC9C25A0032AFC5 /* StartViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StartViewController.h; sourceTree = "<group>"; };
 		931053841EC9C25A0032AFC5 /* StartViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = StartViewController.m; sourceTree = "<group>"; };
 		9346AB231EBF273B004B4396 /* Reachability.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Reachability.h; sourceTree = "<group>"; };
 		9346AB241EBF273B004B4396 /* Reachability.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Reachability.m; sourceTree = "<group>"; };
+		9360EAAE1EE2D97F00ABFAC2 /* EnterPinViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EnterPinViewController.h; sourceTree = "<group>"; };
+		9360EAAF1EE2D97F00ABFAC2 /* EnterPinViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EnterPinViewController.m; sourceTree = "<group>"; };
+		9360EAB21EE2DA0C00ABFAC2 /* THPinInputCirclesView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = THPinInputCirclesView.h; sourceTree = "<group>"; };
+		9360EAB31EE2DA0C00ABFAC2 /* THPinInputCirclesView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = THPinInputCirclesView.m; sourceTree = "<group>"; };
+		9360EAB41EE2DA0C00ABFAC2 /* THPinInputCircleView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = THPinInputCircleView.h; sourceTree = "<group>"; };
+		9360EAB51EE2DA0C00ABFAC2 /* THPinInputCircleView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = THPinInputCircleView.m; sourceTree = "<group>"; };
+		9360EAB61EE2DA0C00ABFAC2 /* THPinNumButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = THPinNumButton.h; sourceTree = "<group>"; };
+		9360EAB71EE2DA0C00ABFAC2 /* THPinNumButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = THPinNumButton.m; sourceTree = "<group>"; };
+		9360EAB81EE2DA0C00ABFAC2 /* THPinNumPadView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = THPinNumPadView.h; sourceTree = "<group>"; };
+		9360EAB91EE2DA0C00ABFAC2 /* THPinNumPadView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = THPinNumPadView.m; sourceTree = "<group>"; };
+		9360EABA1EE2DA0C00ABFAC2 /* THPinView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = THPinView.h; sourceTree = "<group>"; };
+		9360EABB1EE2DA0C00ABFAC2 /* THPinView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = THPinView.m; sourceTree = "<group>"; };
+		9360EABC1EE2DA0C00ABFAC2 /* THPinViewController.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = THPinViewController.bundle; sourceTree = "<group>"; };
+		9360EABD1EE2DA0C00ABFAC2 /* THPinViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = THPinViewController.h; sourceTree = "<group>"; };
+		9360EABE1EE2DA0C00ABFAC2 /* THPinViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = THPinViewController.m; sourceTree = "<group>"; };
+		9360EABF1EE2DA0C00ABFAC2 /* UIImage+ImageEffects.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIImage+ImageEffects.h"; sourceTree = "<group>"; };
+		9360EAC01EE2DA0C00ABFAC2 /* UIImage+ImageEffects.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIImage+ImageEffects.m"; sourceTree = "<group>"; };
+		9360EACA1EE3D73700ABFAC2 /* LocalAuthentication.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = LocalAuthentication.framework; path = System/Library/Frameworks/LocalAuthentication.framework; sourceTree = SDKROOT; };
+		9360EACC1EE6C5B900ABFAC2 /* BaseViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BaseViewController.h; sourceTree = "<group>"; };
+		9360EACD1EE6C5B900ABFAC2 /* BaseViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BaseViewController.m; sourceTree = "<group>"; };
 		936136BB1EB4F99400ABC921 /* SSA.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SSA.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		936136BF1EB4F99500ABC921 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		936136C11EB4F99500ABC921 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -144,7 +183,6 @@
 		9364A1F91EB8B4ED00337893 /* KidsInActivityViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KidsInActivityViewController.m; sourceTree = "<group>"; };
 		9364A1FB1EB8B6BD00337893 /* schools-blue@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "schools-blue@2x.png"; sourceTree = "<group>"; };
 		9364A1FC1EB8B6BD00337893 /* messages-blue@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "messages-blue@2x.png"; sourceTree = "<group>"; };
-		9364A1FD1EB8B6BD00337893 /* kids-blue@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "kids-blue@2x.png"; sourceTree = "<group>"; };
 		9364A1FE1EB8B6BD00337893 /* activities-blue@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "activities-blue@2x.png"; sourceTree = "<group>"; };
 		9364A20E1EBC976F00337893 /* ServiceModel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ServiceModel.h; sourceTree = "<group>"; };
 		9364A20F1EBC977000337893 /* ServiceModel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ServiceModel.m; sourceTree = "<group>"; };
@@ -216,6 +254,7 @@
 		93A9FD061EB75EDE00F49C5A /* ActivitiesListTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ActivitiesListTableViewCell.m; sourceTree = "<group>"; };
 		93A9FD081EB7765C00F49C5A /* MessagesListTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MessagesListTableViewCell.h; sourceTree = "<group>"; };
 		93A9FD091EB7765C00F49C5A /* MessagesListTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MessagesListTableViewCell.m; sourceTree = "<group>"; };
+		93B9B4D91EE811E400DA9E2D /* checkIcon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "checkIcon@2x.png"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -223,6 +262,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9360EACB1EE3D73700ABFAC2 /* LocalAuthentication.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -243,6 +283,36 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		9360EAB11EE2D9EF00ABFAC2 /* EnterPin */ = {
+			isa = PBXGroup;
+			children = (
+				9360EAB21EE2DA0C00ABFAC2 /* THPinInputCirclesView.h */,
+				9360EAB31EE2DA0C00ABFAC2 /* THPinInputCirclesView.m */,
+				9360EAB41EE2DA0C00ABFAC2 /* THPinInputCircleView.h */,
+				9360EAB51EE2DA0C00ABFAC2 /* THPinInputCircleView.m */,
+				9360EAB61EE2DA0C00ABFAC2 /* THPinNumButton.h */,
+				9360EAB71EE2DA0C00ABFAC2 /* THPinNumButton.m */,
+				9360EAB81EE2DA0C00ABFAC2 /* THPinNumPadView.h */,
+				9360EAB91EE2DA0C00ABFAC2 /* THPinNumPadView.m */,
+				9360EABA1EE2DA0C00ABFAC2 /* THPinView.h */,
+				9360EABB1EE2DA0C00ABFAC2 /* THPinView.m */,
+				9360EABC1EE2DA0C00ABFAC2 /* THPinViewController.bundle */,
+				9360EABD1EE2DA0C00ABFAC2 /* THPinViewController.h */,
+				9360EABE1EE2DA0C00ABFAC2 /* THPinViewController.m */,
+				9360EABF1EE2DA0C00ABFAC2 /* UIImage+ImageEffects.h */,
+				9360EAC01EE2DA0C00ABFAC2 /* UIImage+ImageEffects.m */,
+			);
+			name = EnterPin;
+			sourceTree = "<group>";
+		};
+		9360EAC91EE3D73700ABFAC2 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				9360EACA1EE3D73700ABFAC2 /* LocalAuthentication.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		936136B21EB4F99300ABC921 = {
 			isa = PBXGroup;
 			children = (
@@ -250,6 +320,7 @@
 				936136D71EB4F99700ABC921 /* SSATests */,
 				936136E21EB4F99800ABC921 /* SSAUITests */,
 				936136BC1EB4F99400ABC921 /* Products */,
+				9360EAC91EE3D73700ABFAC2 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -318,6 +389,8 @@
 				93A9FCE81EB609B700F49C5A /* Schools */,
 				931053831EC9C25A0032AFC5 /* StartViewController.h */,
 				931053841EC9C25A0032AFC5 /* StartViewController.m */,
+				9360EACC1EE6C5B900ABFAC2 /* BaseViewController.h */,
+				9360EACD1EE6C5B900ABFAC2 /* BaseViewController.m */,
 			);
 			name = Controllers;
 			sourceTree = "<group>";
@@ -347,7 +420,7 @@
 			children = (
 				9364A1FB1EB8B6BD00337893 /* schools-blue@2x.png */,
 				9364A1FC1EB8B6BD00337893 /* messages-blue@2x.png */,
-				9364A1FD1EB8B6BD00337893 /* kids-blue@2x.png */,
+				93016C381EEBF10E00769B70 /* kids-blue@2x.png */,
 				9364A1FE1EB8B6BD00337893 /* activities-blue@2x.png */,
 			);
 			name = "Tab Images";
@@ -388,9 +461,11 @@
 				9364A1D51EB89A2300337893 /* Add-Circle@2x.png */,
 				9397090B1EC718B000099774 /* CheckMark@2x.png */,
 				9397090D1EC71FC100099774 /* check-box-empty@2x.png */,
+				93B9B4D91EE811E400DA9E2D /* checkIcon@2x.png */,
 				9364A1E71EB89DCD00337893 /* confirmSchool-black-Active@2x.png */,
 				9364A1E81EB89DCD00337893 /* confirmSchool-black@2x.png */,
 				9364A1EB1EB89EE500337893 /* confirm-pswd@2x.png */,
+				93016C341EEBEF3A00769B70 /* confirm-setpin@2x.png */,
 				9364A1ED1EB89EF100337893 /* email@2x.png */,
 				9364A1D91EB89A9B00337893 /* Kid-Profile-Blue@2x.png */,
 				9364A1DB1EB89B3600337893 /* Kid-Profile-Black@2x.png */,
@@ -398,12 +473,14 @@
 				9364A1D71EB89A6D00337893 /* List-of-Kids@2x.png */,
 				9364A1DD1EB89BE700337893 /* List-of-Schools@2x.png */,
 				9364A1DF1EB89C2500337893 /* List-of-Schools-Black@2x.png */,
+				93016C331EEBEF3A00769B70 /* mobile@2x.png */,
 				93A9FCF81EB7077600F49C5A /* downArrow@2x.png */,
 				93A9FCED1EB61E6900F49C5A /* SchoolPlaceHolder@2x.png */,
 				93A9FCC51EB5B89100F49C5A /* check-box@2x.png */,
 				93A9FCC61EB5B89100F49C5A /* black-check-box@2x.png */,
 				93A9FCC11EB5A36D00F49C5A /* Person@2x.png */,
 				9364A1CF1EB8947E00337893 /* pswd@2x.png */,
+				93016C321EEBEF3A00769B70 /* setpin@2x.png */,
 				9364A1D01EB8947E00337893 /* user@2x.png */,
 			);
 			name = Images;
@@ -484,12 +561,15 @@
 		93A9FCEC1EB60A4700F49C5A /* LoginAndRegistration */ = {
 			isa = PBXGroup;
 			children = (
+				9360EAB11EE2D9EF00ABFAC2 /* EnterPin */,
 				936136F21EB58C1C00ABC921 /* LoginViewController.h */,
 				936136F31EB58C1C00ABC921 /* LoginViewController.m */,
 				93A9FCC91EB5DD1600F49C5A /* RegisterViewController.h */,
 				93A9FCCA1EB5DD1600F49C5A /* RegisterViewController.m */,
 				93A9FCCC1EB5EFA600F49C5A /* MpinViewController.h */,
 				93A9FCCD1EB5EFA600F49C5A /* MpinViewController.m */,
+				9360EAAE1EE2D97F00ABFAC2 /* EnterPinViewController.h */,
+				9360EAAF1EE2D97F00ABFAC2 /* EnterPinViewController.m */,
 			);
 			name = LoginAndRegistration;
 			sourceTree = "<group>";
@@ -604,6 +684,7 @@
 				9364A1D41EB899F200337893 /* addKids@2x.png in Resources */,
 				93A9FCF91EB7077600F49C5A /* downArrow@2x.png in Resources */,
 				93A9FD041EB7576500F49C5A /* ActivitySectionHeaderView.xib in Resources */,
+				93016C351EEBEF3A00769B70 /* setpin@2x.png in Resources */,
 				9397090E1EC71FC100099774 /* check-box-empty@2x.png in Resources */,
 				9364A1DC1EB89B3600337893 /* Kid-Profile-Black@2x.png in Resources */,
 				9364A1E51EB89DAD00337893 /* addSchool-black-Active@2x.png in Resources */,
@@ -619,14 +700,18 @@
 				9364A1EC1EB89EE500337893 /* confirm-pswd@2x.png in Resources */,
 				93A9FCC81EB5B89100F49C5A /* black-check-box@2x.png in Resources */,
 				9364A1FF1EB8B6BD00337893 /* schools-blue@2x.png in Resources */,
+				93B9B4DA1EE811E400DA9E2D /* checkIcon@2x.png in Resources */,
 				93A9FCC21EB5A36D00F49C5A /* Person@2x.png in Resources */,
 				93A9FCC71EB5B89100F49C5A /* check-box@2x.png in Resources */,
+				93016C361EEBEF3A00769B70 /* mobile@2x.png in Resources */,
 				9397090C1EC718B000099774 /* CheckMark@2x.png in Resources */,
+				93016C371EEBEF3A00769B70 /* confirm-setpin@2x.png in Resources */,
 				9364A1E01EB89C2500337893 /* List-of-Schools-Black@2x.png in Resources */,
+				93016C391EEBF10E00769B70 /* kids-blue@2x.png in Resources */,
 				936136CB1EB4F99600ABC921 /* Assets.xcassets in Resources */,
 				9364A2021EB8B6BD00337893 /* activities-blue@2x.png in Resources */,
-				9364A2011EB8B6BD00337893 /* kids-blue@2x.png in Resources */,
 				9364A1D11EB8947E00337893 /* pswd@2x.png in Resources */,
+				9360EAC61EE2DA0C00ABFAC2 /* THPinViewController.bundle in Resources */,
 				93A9FCEE1EB61E6900F49C5A /* SchoolPlaceHolder@2x.png in Resources */,
 				9364A1E21EB89C6B00337893 /* activity@2x.png in Resources */,
 				936136C91EB4F99600ABC921 /* Main.storyboard in Resources */,
@@ -658,6 +743,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				9364A2271EBC97AE00337893 /* AFHTTPRequestOperation.m in Sources */,
+				9360EAC71EE2DA0C00ABFAC2 /* THPinViewController.m in Sources */,
 				93A9FCE71EB609B300F49C5A /* AddSchoolViewController.m in Sources */,
 				93A9FCFC1EB70F6900F49C5A /* AddKidViewController.m in Sources */,
 				9364A2301EBC97D000337893 /* Parse.m in Sources */,
@@ -667,15 +753,19 @@
 				93A9FCF71EB7039E00F49C5A /* KidsListTableViewCell.m in Sources */,
 				936136C31EB4F99500ABC921 /* AppDelegate.m in Sources */,
 				9364A2331EBDE3E200337893 /* Utility.m in Sources */,
+				9360EACE1EE6C5BD00ABFAC2 /* BaseViewController.m in Sources */,
 				9364A2281EBC97AE00337893 /* AFImageRequestOperation.m in Sources */,
 				9364A2261EBC97AE00337893 /* AFHTTPClient.m in Sources */,
 				9364A22C1EBC97AE00337893 /* AFURLConnectionOperation.m in Sources */,
 				9364A22B1EBC97AE00337893 /* AFPropertyListRequestOperation.m in Sources */,
+				9360EAC31EE2DA0C00ABFAC2 /* THPinNumButton.m in Sources */,
 				93A9FCD81EB6094B00F49C5A /* KidsViewController.m in Sources */,
 				931053851EC9C25A0032AFC5 /* StartViewController.m in Sources */,
 				9364A2131EBC978300337893 /* ProgressHUD.m in Sources */,
 				9364A2291EBC97AE00337893 /* AFJSONRequestOperation.m in Sources */,
+				9360EAC41EE2DA0C00ABFAC2 /* THPinNumPadView.m in Sources */,
 				93A9FCDE1EB6097500F49C5A /* ActivitiesViewController.m in Sources */,
+				9360EAC21EE2DA0C00ABFAC2 /* THPinInputCircleView.m in Sources */,
 				9364A22A1EBC97AE00337893 /* AFNetworkActivityIndicatorManager.m in Sources */,
 				936136C01EB4F99500ABC921 /* main.m in Sources */,
 				9364A2101EBC977000337893 /* ServiceModel.m in Sources */,
@@ -686,11 +776,15 @@
 				931053821EC9A8550032AFC5 /* NewKidViewController.m in Sources */,
 				9346AB251EBF273B004B4396 /* Reachability.m in Sources */,
 				93A9FCFF1EB7484A00F49C5A /* ActivitiesListViewController.m in Sources */,
+				9360EAC11EE2DA0C00ABFAC2 /* THPinInputCirclesView.m in Sources */,
 				9364A1FA1EB8B4ED00337893 /* KidsInActivityViewController.m in Sources */,
 				93A9FCF41EB702FD00F49C5A /* KidsListViewController.m in Sources */,
 				9364A1CC1EB8849F00337893 /* SharedManager.m in Sources */,
+				9360EAC51EE2DA0C00ABFAC2 /* THPinView.m in Sources */,
+				9360EAC81EE2DA0C00ABFAC2 /* UIImage+ImageEffects.m in Sources */,
 				93A9FCE11EB6098900F49C5A /* MessageViewController.m in Sources */,
 				93A9FD071EB75EDE00F49C5A /* ActivitiesListTableViewCell.m in Sources */,
+				9360EAB01EE2D98000ABFAC2 /* EnterPinViewController.m in Sources */,
 				93A9FCCE1EB5EFA600F49C5A /* MpinViewController.m in Sources */,
 				93A9FD0A1EB7765C00F49C5A /* MessagesListTableViewCell.m in Sources */,
 				93A9FCCB1EB5DD1600F49C5A /* RegisterViewController.m in Sources */,

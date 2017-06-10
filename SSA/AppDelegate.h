@@ -23,6 +23,6 @@
 - (NSString *)getUUID;
 - (void)initializeLocationManager;
 - (NSString *)getStringFromDate:(NSDate *)date withFormat:(NSString *)dateFormat;
-
+- (BOOL)isTouchIDAvailable;
 @end
 

@@ -13,14 +13,17 @@
 #import "Parse.h"
 #import "AppDelegate.h"
 #import "AlertMessage.h"
+#import "SharedManager.h"
 
-@interface AddSchoolViewController ()
+@interface AddSchoolViewController ()<AlertMessageDelegateProtocol>
 {
     UITextField *activeTextField;
     NSString *schoolName;
+    NSDictionary *schoolResponseDict;
 }
 - (IBAction)addSchoolUIDNumberAction:(id)sender;
 - (IBAction)confirmSchoolAction:(id)sender;
+- (IBAction)showSchoolUIDNumberAction:(id)sender;
 
 @end
 
@@ -94,15 +97,15 @@
  */
 - (void)fetchSchoolDetails{
     [[ProgressHUD sharedProgressHUD] showActivityIndicatorOnView:self.view];
-    [ServiceModel makeGetRequestFor:AddSchool WithInputParams:[NSString stringWithFormat:@"userRef=%@&SchoolUniqueId=%@&requestedon=%@&requestedfrom=%@&guid=%@&parentUserRef=%@",[[NSUserDefaults standardUserDefaults] objectForKey:@"UserRef"],_UIDNumberField.text,[appDelegate getStringFromDate:[NSDate date] withFormat:@"dd-MM-yyyy%20hh:mm:ss"],@"Mobile",[appDelegate getUUID],[[NSUserDefaults standardUserDefaults] objectForKey:@"UserRef"]] MakeHttpRequest:^(NSDictionary *response, NSError *error){
+    [ServiceModel makeGetRequestFor:AddSchool WithInputParams:[NSString stringWithFormat:@"userRef=%@&SchoolUniqueId=%@&requestedon=%@&requestedfrom=%@&guid=%@&parentUserRef=%@&geolocation=%@",[[NSUserDefaults standardUserDefaults] objectForKey:UserRef],_UIDNumberField.text,[appDelegate getStringFromDate:[NSDate date] withFormat:@"dd-MM-yyyy%20hh:mm:ss"],@"Mobile",[appDelegate getUUID],[[NSUserDefaults standardUserDefaults] objectForKey:UserRef],[appDelegate currentLocation]] AndToken:[[NSUserDefaults standardUserDefaults] objectForKey:AccessToken] MakeHttpRequest:^(NSDictionary *response, NSError *error){
         dispatch_async(dispatch_get_main_queue(), ^{
             [[ProgressHUD sharedProgressHUD] removeHUD];
             if (!error) {
                 NSLog(@" Add School Response  : %@", response);
-                if([response objectForKey:@"body"]){
+                if([[response objectForKey:@"body"] objectForKey:@"message"]){
                     [[AlertMessage sharedAlert] showAlertWithMessage:[[response objectForKey:@"body"] objectForKey:@"message"] withDelegate:nil onViewController:self];
                 }else{
-                    [self updateSchoolDetails:response];
+                    [self updateSchoolDetails:[response objectForKey:@"body"]];
                     [_addSchoolUIDNumberBackgroundview setHidden:true];
                     [_confirmSchoolBackgroundView setHidden:false];
                     [_confirmSchoolImageView setImage:[UIImage imageNamed:@"confirmSchool-black-Active.png"]];
@@ -110,8 +113,12 @@
                 }
                 
             }else{
+                if ([error.localizedDescription isEqualToString:TokenExpiredString]) {
+                    [[AlertMessage sharedAlert] showAlertWithMessage:@"Session expired. Please login once again." withDelegate:self onViewController:self];
+                }else{
+                    [[AlertMessage sharedAlert] showAlertWithMessage:error.localizedDescription withDelegate:nil onViewController:self];
+                }
                 NSLog(@" Error : %@", error.localizedDescription);
-                [[AlertMessage sharedAlert] showAlertWithMessage:error.localizedDescription withDelegate:nil onViewController:self];
             }
             
         });
@@ -123,6 +130,7 @@
  * @Param schoolDict as NSDictionary Object
  */
 - (void)updateSchoolDetails:(NSDictionary *)schoolDict{
+    schoolResponseDict = schoolDict;
     [_schoolNameLabel setText:[schoolDict objectForKey:@"SchoolName"]];
     [_schoolAddressLabel setText:[NSString stringWithFormat:@"City : %@ \nState : %@ \nPincode : %@ \nWebSite : %@",[schoolDict objectForKey:@"city"],[schoolDict objectForKey:@"state"],[schoolDict objectForKey:@"zip"],[schoolDict objectForKey:@"WebSite"]]];
 }
@@ -136,26 +144,36 @@
     NSMutableDictionary *headersDict = [[NSMutableDictionary alloc] init];
     [headersDict setObject:@"Mobile" forKey:@"requestedfrom"];
     [headersDict setObject:[appDelegate getStringFromDate:[NSDate date] withFormat:@"yyyy-MM-dd%20hh:mm:ss"] forKey:@"requestedon"];
-    [headersDict setObject:[[NSUserDefaults standardUserDefaults] objectForKey:@"UserRef"] forKey:@"parentUserRef"];
+    [headersDict setObject:[[NSUserDefaults standardUserDefaults] objectForKey:UserRef] forKey:@"parentUserRef"];
     [headersDict setObject:[appDelegate getUUID] forKey:@"guid"];
+    [headersDict setObject:[[NSUserDefaults standardUserDefaults] objectForKey:UserRef] forKey:@"userRef"];
     [mainDict setObject:headersDict forKey:@"header"];
     
     NSMutableDictionary *bodyDict = [[NSMutableDictionary alloc] init];
     [bodyDict setObject:@"" forKey:@"modifiedOn"];
     [bodyDict setObject:@"" forKey:@"modifiedBy"];
     [bodyDict setObject:@"Parent" forKey:@"createdBy"];
-    [bodyDict setObject:[[NSUserDefaults standardUserDefaults] objectForKey:@"UserRef"] forKey:@"parentUserRef"];
+    [bodyDict setObject:[[NSUserDefaults standardUserDefaults] objectForKey:UserRef] forKey:@"parentUserRef"];
     [bodyDict setObject:_UIDNumberField.text forKey:@"SchoolUniqueId"];
     [bodyDict setObject:_schoolNameLabel.text forKey:@"SchoolName"];
     [bodyDict setObject:[appDelegate getStringFromDate:[NSDate date] withFormat:@"dd-MM-yyyy%20HH:MM:SS"] forKey:@"createdOn"];
     [bodyDict setObject:@"" forKey:@"ParentSchoolId"];
+    [bodyDict setObject:[[NSUserDefaults standardUserDefaults] objectForKey:UserRef] forKey:@"userRef"];
+    [bodyDict setObject:[schoolResponseDict objectForKey:@"city"] forKey:@"city"];
+    [bodyDict setObject:[schoolResponseDict objectForKey:@"state"] forKey:@"state"];
+    [bodyDict setObject:[schoolResponseDict objectForKey:@"FirstName"] forKey:@"FirstName"];
+    [bodyDict setObject:[schoolResponseDict objectForKey:@"LastName"] forKey:@"LastName"];
+    [bodyDict setObject:[schoolResponseDict objectForKey:@"Address"] forKey:@"Address"];
+    [bodyDict setObject:[schoolResponseDict objectForKey:@"title"] forKey:@"title"];
+    [bodyDict setObject:[schoolResponseDict objectForKey:@"EmailId"] forKey:@"EmailId"];
+    [bodyDict setObject:[schoolResponseDict objectForKey:@"zip"] forKey:@"zip"];
     
-    NSMutableArray *bodyArray = [[NSMutableArray alloc] init];
-    [bodyArray addObject:bodyDict];
+    //NSMutableArray *bodyArray = [[NSMutableArray alloc] init];
+    //[bodyArray addObject:bodyDict];
     
-    [mainDict setObject:bodyArray forKey:@"body"];
+    [mainDict setObject:bodyDict forKey:@"body"];
     
-    [ServiceModel makeRequestFor:ConfirmSchool WithInputParams:[appDelegate getJsonFormatedStringFrom:mainDict] MakeHttpRequest:^(NSDictionary *response, NSError *error){
+    [ServiceModel makeRequestFor:ConfirmSchool WithInputParams:[appDelegate getJsonFormatedStringFrom:mainDict] AndToken:[[NSUserDefaults standardUserDefaults] objectForKey:AccessToken] MakeHttpRequest:^(NSDictionary *response, NSError *error){
         dispatch_async(dispatch_get_main_queue(), ^{
             [[ProgressHUD sharedProgressHUD] removeHUD];
             if (!error) {
@@ -173,11 +191,23 @@
                 }
                 NSLog(@" Response  : %@", response);
             }else{
+                if ([error.localizedDescription isEqualToString:TokenExpiredString]) {
+                    [[AlertMessage sharedAlert] showAlertWithMessage:@"Session expired. Please login once again." withDelegate:self onViewController:self];
+                }else{
+                    [[AlertMessage sharedAlert] showAlertWithMessage:error.localizedDescription withDelegate:nil onViewController:self];
+                }
                 NSLog(@" Error : %@", error.localizedDescription);
             }
             
         });
     }];
+}
+
+- (IBAction)showSchoolUIDNumberAction:(id)sender{
+    [_addSchoolUIDNumberBackgroundview setHidden:false];
+    [_confirmSchoolBackgroundView setHidden:true];
+    [_confirmSchoolImageView setImage:[UIImage imageNamed:@"confirmSchool-black.png"]];
+    [_addSchoolImageView setImage:[UIImage imageNamed:@"addSchool-black-Active.png"]];
 }
 #pragma mark - UITextField Delegate Methods
 - (void)textFieldDidBeginEditing:(UITextField *)textField{
@@ -189,5 +219,11 @@
 - (BOOL)textFieldShouldReturn:(UITextField *)textField{
     [textField resignFirstResponder];
     return true;
+}
+
+#pragma mark AlertMessageDelegateProtocol methods
+- (void)clickedOkButton{
+    [[SharedManager sharedManager] logoutTheUser];
+    [[SharedManager sharedManager] showLoginScreen];
 }
 @end

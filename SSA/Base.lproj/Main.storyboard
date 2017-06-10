@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="12120" systemVersion="16C67" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="DoI-Zs-bhT">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="12121" systemVersion="16C67" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="DoI-Zs-bhT">
     <device id="retina4_7" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="12088"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="12089"/>
         <capability name="Constraints with non-1.0 multipliers" minToolsVersion="5.1"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -506,13 +506,23 @@
                                                 <rect key="frame" x="0.0" y="0.0" width="50" height="50"/>
                                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                             </imageView>
+                                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="fqy-7G-yBM">
+                                                <rect key="frame" x="0.0" y="0.0" width="50" height="50"/>
+                                                <connections>
+                                                    <action selector="showSchoolUIDNumberAction:" destination="18A-79-nYK" eventType="touchUpInside" id="JRp-3K-zD3"/>
+                                                </connections>
+                                            </button>
                                         </subviews>
                                         <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                         <constraints>
                                             <constraint firstAttribute="trailing" secondItem="LbT-jn-LSg" secondAttribute="trailing" id="5PP-hv-SvP"/>
                                             <constraint firstAttribute="height" constant="50" id="Ewl-In-N0I"/>
+                                            <constraint firstItem="fqy-7G-yBM" firstAttribute="leading" secondItem="ok0-kx-lZO" secondAttribute="leading" id="FHo-m1-WR1"/>
+                                            <constraint firstAttribute="trailing" secondItem="fqy-7G-yBM" secondAttribute="trailing" id="ItU-gK-6ds"/>
                                             <constraint firstItem="LbT-jn-LSg" firstAttribute="leading" secondItem="ok0-kx-lZO" secondAttribute="leading" id="PMR-bW-PQo"/>
+                                            <constraint firstItem="fqy-7G-yBM" firstAttribute="top" secondItem="ok0-kx-lZO" secondAttribute="top" id="VEd-rh-ELJ"/>
                                             <constraint firstAttribute="width" constant="50" id="Zkf-Ii-TFN"/>
+                                            <constraint firstAttribute="bottom" secondItem="fqy-7G-yBM" secondAttribute="bottom" id="iee-3X-Vyf"/>
                                             <constraint firstAttribute="bottom" secondItem="LbT-jn-LSg" secondAttribute="bottom" id="nQY-Wq-nnb"/>
                                             <constraint firstItem="LbT-jn-LSg" firstAttribute="top" secondItem="ok0-kx-lZO" secondAttribute="top" id="p7I-Yp-oer"/>
                                         </constraints>
@@ -1950,7 +1960,7 @@
                                                     <outlet property="delegate" destination="88Q-tV-FBS" id="LRw-IS-9jI"/>
                                                 </connections>
                                             </textField>
-                                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Email Id" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="4dN-4a-kqy">
+                                            <textField opaque="NO" clipsSubviews="YES" tag="100" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Email Id" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="4dN-4a-kqy">
                                                 <rect key="frame" x="10" y="171" width="324" height="40"/>
                                                 <color key="backgroundColor" red="0.98039215686274506" green="0.99607843137254903" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                 <constraints>

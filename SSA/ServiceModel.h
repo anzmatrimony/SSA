@@ -20,13 +20,16 @@
 
 + (void)getAddressForLatitude:(NSString *)latitude AndLongitude:(NSString *)longitude GetAddress:(void (^)(NSDictionary *result, NSError *error))block;
 
-+ (void)makeRequestFor:(int)requestType WithInputParams:(NSData *)inputParams MakeHttpRequest:(void (^)(NSDictionary *result, NSError* error))block;
++ (void)makeRequestFor:(int)requestType WithInputParams:(NSData *)inputParams AndToken:(NSString *)token MakeHttpRequest:(void (^)(NSDictionary *result, NSError* error))block;
 
-+ (void)makeGetRequestFor:(int)requestType WithInputParams:(NSString *)inputParams MakeHttpRequest:(void (^)(NSDictionary *result, NSError* error))block;
++ (void)makeGetRequestFor:(int)requestType WithInputParams:(NSString *)inputParams AndToken:(NSString *)token MakeHttpRequest:(void (^)(NSDictionary *result, NSError* error))block;
 
 + (void)updateProfilePicture:(UIImage *)profilePicture WithInputParams:(NSString *)inputParams UpdateProfilePicture:(void (^)(NSDictionary *result, NSError *error))block;
 //+ (void)checkVersion:(NSString *)version CheckVersion:(void (^)(NSDictionary *result, NSError *error))block;
 
 + (void)downloadInvoiceFor:(NSString *)orderId Invoice:(void (^)(NSDictionary *result, NSError *error))block;
 
++ (void)getTokenWithUserName:(NSString *)userName AndPassword:(NSString *)password GetAccessToken:(void (^)(NSDictionary *result, NSError *error))block;
+
++ (void)GetAccessTokenWithOutPassword:(void (^)(NSDictionary *result, NSError *error))block;
 @end

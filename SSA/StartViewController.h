@@ -7,7 +7,9 @@
 //
 
 #import <UIKit/UIKit.h>
-
+@class AppDelegate;
 @interface StartViewController : UIViewController
-
+{
+    AppDelegate *appDelegate;
+}
 @end

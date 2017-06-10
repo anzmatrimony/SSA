@@ -11,6 +11,9 @@
 #import "Constants.h"
 #import "AlertMessage.h"
 #import "SharedManager.h"
+#import "ProgressHUD.h"
+#import "ServiceModel.h"
+#import "Parse.h"
 
 @interface LoginViewController (){
     UITextField *activeTextField;
@@ -31,7 +34,7 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    isRememberMeSelected = false;
+    isRememberMeSelected = [[NSUserDefaults standardUserDefaults] boolForKey:RememberMeStatus];
     [self.navigationController setNavigationBarHidden:YES animated:YES];
     
     appDelegate = [[UIApplication sharedApplication] delegate];
@@ -51,6 +54,12 @@
     _passwordField.leftView = [appDelegate leftViewForTextfiledWithImage:@"pswd.png" withCornerRadius:passwordfiledLeftViewCornersArray1];
     _passwordField.leftViewMode = UITextFieldViewModeAlways;
     
+    if (isRememberMeSelected) {
+        _userNameField.text = [[NSUserDefaults standardUserDefaults] objectForKey:UserName];
+        _passwordField.text = [[NSUserDefaults standardUserDefaults] objectForKey:Password];
+        [_rememberMeCheckBoxButton setImage:[UIImage imageNamed:@"checkIcon.png"] forState:UIControlStateNormal];
+    }
+    
 }
 
 - (void)viewWillAppear:(BOOL)animated{
@@ -68,24 +77,83 @@
     if (isRememberMeSelected) {
         [_rememberMeCheckBoxButton setImage:[UIImage imageNamed:@"black-check-box.png"] forState:UIControlStateNormal];
     }else{
-        [_rememberMeCheckBoxButton setImage:[UIImage imageNamed:@"check-box.png"] forState:UIControlStateNormal];
+        [_rememberMeCheckBoxButton setImage:[UIImage imageNamed:@"checkIcon.png"] forState:UIControlStateNormal];
     }
     isRememberMeSelected = !isRememberMeSelected;
+    [[NSUserDefaults standardUserDefaults] setBool:isRememberMeSelected forKey:RememberMeStatus];
 }
 - (IBAction)loginAction:(id)sender{
     if ([self doValidation]) {
-        if ([_userNameField.text isEqualToString:[[NSUserDefaults standardUserDefaults] objectForKey:@"UserName"]] && [_passwordField.text isEqualToString:[[NSUserDefaults standardUserDefaults] objectForKey:@"Password"]]) {
+        [[ProgressHUD sharedProgressHUD] showActivityIndicatorOnView:self.view];
+        [ServiceModel getTokenWithUserName:_userNameField.text AndPassword:_passwordField.text GetAccessToken:^(NSDictionary *response, NSError *error){
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [[ProgressHUD sharedProgressHUD] removeHUD];
+                if (!error) {
+                    if([response objectForKey:@"error"]){
+                        [[AlertMessage sharedAlert] showAlertWithMessage:@"Authentication failed" withDelegate:nil onViewController:self];
+                    }else{
+                        [[NSUserDefaults standardUserDefaults] setObject:[response objectForKey:@"access_token"] forKey:AccessToken];
+                        [self fetchProfileInfo];
+                        /*[[NSUserDefaults standardUserDefaults] setObject:[response objectForKey:@"access_token"] forKey:AccessToken];
+                        [[NSUserDefaults standardUserDefaults] setObject:@"InProcess" forKey:@"LoginStatus"];
+                        [[NSUserDefaults standardUserDefaults] setObject:_userNameField.text forKey:UserRef];
+                        NSLog(@" Login Status : %@",[[NSUserDefaults standardUserDefaults] objectForKey:@"LoginStatus"]);
+                        [[SharedManager sharedManager] showMPinScreen];*/
+                    }
+                    NSLog(@"Response %@",response);
+                }else{
+                    [[AlertMessage sharedAlert] showAlertWithMessage:error.localizedDescription withDelegate:nil onViewController:self];
+                }
+            });
+        }];
+        /*if ([_userNameField.text isEqualToString:[[NSUserDefaults standardUserDefaults] objectForKey:@"UserName"]] && [_passwordField.text isEqualToString:[[NSUserDefaults standardUserDefaults] objectForKey:@"Password"]]) {
             [[NSUserDefaults standardUserDefaults] setObject:@"InProcess" forKey:@"LoginStatus"];
             NSLog(@" Login Status : %@",[[NSUserDefaults standardUserDefaults] objectForKey:@"LoginStatus"]);
             [[SharedManager sharedManager] showMPinScreen];
         }else{
             [[AlertMessage sharedAlert] showAlertWithMessage:@"Invalid credentials" withDelegate:nil onViewController:self];
-        }
+        }*/
     }
 }
 
 - (IBAction)forgotPasswordAction:(id)sender{
     // show forgot password screen
+}
+
+/**
+ *@Discussion fetching user profile upon successfull login
+ */
+- (void)fetchProfileInfo{
+    
+    [[ProgressHUD sharedProgressHUD] showActivityIndicatorOnView:self.view];
+    [ServiceModel makeGetRequestFor:GetProfile WithInputParams:[NSString stringWithFormat:@"userId=%@&requestedOn=%@&requestedFrom=%@&guid=%@&userRef=%@&geoLocation=%@",_userNameField.text,[appDelegate getStringFromDate:[NSDate date] withFormat:@"dd-MM-yyyy%20hh:mm:ss"],@"Mobile",[appDelegate getUUID],_userNameField.text, [appDelegate currentLocation]] AndToken:[[NSUserDefaults standardUserDefaults] objectForKey:AccessToken] MakeHttpRequest:^(NSDictionary *response, NSError *error){
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [[ProgressHUD sharedProgressHUD] removeHUD];
+            if (!error) {
+                if([response objectForKey:@"error"]){
+                    [[AlertMessage sharedAlert] showAlertWithMessage:@"Authentication failed" withDelegate:nil onViewController:self];
+                }else{
+                    if([[response objectForKey:@"body"] objectForKey:@"message"]){
+                        [[AlertMessage sharedAlert] showAlertWithMessage:[[response objectForKey:@"body"] objectForKey:@"message"] withDelegate:nil onViewController:self];
+                    }else{
+                        
+                        [[NSUserDefaults standardUserDefaults] setObject:_userNameField.text forKey:UserName];
+                        [[NSUserDefaults standardUserDefaults] setObject:_passwordField.text forKey:Password];
+                        
+                        [[NSUserDefaults standardUserDefaults] setObject:@"InProcess" forKey:@"LoginStatus"];
+                        [[NSUserDefaults standardUserDefaults] setObject:[[response objectForKey:@"body"] objectForKey:@"userRef"] forKey:UserRef];
+                        [[NSUserDefaults standardUserDefaults] setObject:[[response objectForKey:@"body"] objectForKey:@"Role"] forKey:Role];
+                        [[NSUserDefaults standardUserDefaults] setObject:[[response objectForKey:@"body"] objectForKey:@"status"] forKey:UserStatus];
+                        NSLog(@" Login Status : %@",[[NSUserDefaults standardUserDefaults] objectForKey:@"LoginStatus"]);
+                        [[SharedManager sharedManager] showMPinScreen];
+                    }
+                }
+                NSLog(@"Response %@",response);
+            }else{
+                [[AlertMessage sharedAlert] showAlertWithMessage:error.localizedDescription withDelegate:nil onViewController:self];
+            }
+        });
+    }];
 }
 
 // Validating user inputs

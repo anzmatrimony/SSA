@@ -21,5 +21,7 @@
 - (void)showLoginScreen;
 - (void)showHomeScreen;
 - (void)showMPinScreen;
+- (void)showEnterMPinScreen;
+- (void)logoutTheUser;
 
 @end

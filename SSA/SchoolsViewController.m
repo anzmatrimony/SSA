@@ -12,8 +12,10 @@
 #import "ServiceModel.h"
 #import "Parse.h"
 #import "AppDelegate.h"
+#import "AlertMessage.h"
+#import "SharedManager.h"
 
-@interface SchoolsViewController ()
+@interface SchoolsViewController ()<AlertMessageDelegateProtocol>
 {
     NSMutableArray *schoolsArray;
     SchoolsListViewController *schoolsListViewController;
@@ -59,7 +61,7 @@
  */
 - (void)fetchSchoolsList{
     [[ProgressHUD sharedProgressHUD] showActivityIndicatorOnView:self.view];
-    [ServiceModel makeGetRequestFor:SchoolsList WithInputParams:[NSString stringWithFormat:@"userRef=%@&requestedon=%@&requestedfrom=%@&guid=%@&parentUserRef=%@",[[NSUserDefaults standardUserDefaults] objectForKey:@"UserRef"],[appDelegate getStringFromDate:[NSDate date] withFormat:@"dd-MM-yyyy%20hh:mm:ss"],@"Mobile",[appDelegate getUUID],[[NSUserDefaults standardUserDefaults] objectForKey:@"UserRef"]] MakeHttpRequest:^(NSDictionary *response, NSError *error){
+    [ServiceModel makeGetRequestFor:SchoolsList WithInputParams:[NSString stringWithFormat:@"userRef=%@&requestedon=%@&requestedfrom=%@&guid=%@&parentUserRef=%@&geolocation=%@",[[NSUserDefaults standardUserDefaults] objectForKey:UserRef],[appDelegate getStringFromDate:[NSDate date] withFormat:@"dd-MM-yyyy%20hh:mm:ss"],@"Mobile",[appDelegate getUUID],[[NSUserDefaults standardUserDefaults] objectForKey:UserRef], [appDelegate currentLocation]]  AndToken:[[NSUserDefaults standardUserDefaults] objectForKey:AccessToken] MakeHttpRequest:^(NSDictionary *response, NSError *error){
         dispatch_async(dispatch_get_main_queue(), ^{
             [[ProgressHUD sharedProgressHUD] removeHUD];
             if (!error) {
@@ -67,6 +69,11 @@
                 schoolsArray = (NSMutableArray *)[[Parse sharedParse] parseSchoolsListResponse:[response objectForKey:@"body"]];
                 [self chooseContentView];
             }else{
+                if ([error.localizedDescription isEqualToString:TokenExpiredString]) {
+                    [[AlertMessage sharedAlert] showAlertWithMessage:@"Session expired. Please login once again." withDelegate:self onViewController:self];
+                }else{
+                    [[AlertMessage sharedAlert] showAlertWithMessage:error.localizedDescription withDelegate:nil onViewController:self];
+                }
                 NSLog(@" Error : %@", error.localizedDescription);
             }
             
@@ -121,5 +128,11 @@
     [viewController setAddSchoolViewControllerDelegate:self];
     [viewController setFromSchoolistPage:true];
     [self.navigationController pushViewController:viewController animated:YES];
+}
+
+#pragma -mark AlertMessageDelegateProtocol Methods
+- (void)clickedOkButton{
+    [[SharedManager sharedManager] logoutTheUser];
+    [[SharedManager sharedManager] showLoginScreen];
 }
 @end
