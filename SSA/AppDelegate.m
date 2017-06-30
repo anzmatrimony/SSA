@@ -40,11 +40,13 @@ static const NSUInteger THNumberOfPinEntries = 6;
     // Changing status bar text color to Light(White)
     [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleLightContent];
     
+    [FIRApp configure];
+    
     return YES;
 }
 
 - (void)customizeTabBarAppearance{
-    UIColor *backgroundColor = COLOR(42, 103, 130);
+    UIColor *backgroundColor = COLOR(0, 85, 113);
     // set the bar background color
     [[UITabBar appearance] setBackgroundImage:[AppDelegate imageFromColor:backgroundColor forSize:CGSizeMake([[UIScreen mainScreen] bounds].size.width, 49) withCornerRadius:0]];
     // set the text color for selected state
@@ -52,12 +54,12 @@ static const NSUInteger THNumberOfPinEntries = 6;
     // set the text color for unselected state
     [[UITabBarItem appearance] setTitleTextAttributes:[NSDictionary dictionaryWithObjectsAndKeys:[UIColor whiteColor], UITextAttributeTextColor, nil] forState:UIControlStateNormal];
     // set the selected icon color
-    [[UITabBar appearance] setTintColor:[UIColor whiteColor]];
-    [[UITabBar appearance] setSelectedImageTintColor:[UIColor whiteColor]];
+    //[[UITabBar appearance] setTintColor:[UIColor whiteColor]];
+    //[[UITabBar appearance] setSelectedImageTintColor:[UIColor whiteColor]];
     // remove the shadow
     [[UITabBar appearance] setShadowImage:nil];
     // Set the dark color to selected tab (the dimmed background)
-    [[UITabBar appearance] setSelectionIndicatorImage:[AppDelegate imageFromColor:COLOR(51, 51, 51) forSize:CGSizeMake([UIScreen mainScreen].bounds.size.width / 4, 49) withCornerRadius:0]];
+    [[UITabBar appearance] setSelectionIndicatorImage:[AppDelegate imageFromColor:COLOR(35, 35, 35) forSize:CGSizeMake([UIScreen mainScreen].bounds.size.width / 4, 49) withCornerRadius:0]];
     
     
 }

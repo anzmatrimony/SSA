@@ -35,6 +35,8 @@
 #define TokenExpiredString @"TokenExpired"
 #define UserName @"UserName"
 #define Password @"Password"
+#define schoolUniqueId @"SchoolUniqueId"
+#define TeacherName @"TeacherName"
 
 #define IsTouchIdRequired @"TouchIdRequired"
 #define BaseURL @""
@@ -47,5 +49,6 @@
 #define KidsList 7
 #define GetProfile 8
 #define ValidateEmail 9
+#define KidListForTeacher 10
 
 #endif /* Constants_h */

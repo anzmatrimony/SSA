@@ -23,6 +23,9 @@
 
 @end
 
+#define NUMBERS_ONLY @"1234567890"
+#define CHARACTER_LIMIT 4
+
 @implementation MpinViewController
 
 - (void)viewDidLoad {
@@ -32,6 +35,7 @@
     appDelegate = [[UIApplication sharedApplication] delegate];
     
     [self applyDesignsToTextFields];
+    [self addToolBarOnTopOfKeyBoard];
 }
 
 - (void)didReceiveMemoryWarning {
@@ -58,6 +62,19 @@
     _confirmMpinTextField.leftViewMode = UITextFieldViewModeAlways;
 }
 
+/**
+ *@discussion display done button on top of keyboard to dismiss the keyboard
+ */
+- (void)addToolBarOnTopOfKeyBoard{
+    UIToolbar *keyboardDoneButtonView = [[UIToolbar alloc] init];
+    [keyboardDoneButtonView sizeToFit];
+    UIBarButtonItem *doneButton = [[UIBarButtonItem alloc] initWithTitle:@"Done"
+                                                                   style:UIBarButtonItemStyleBordered target:self
+                                                                  action:@selector(hideKeyboard)];
+    [keyboardDoneButtonView setItems:[NSArray arrayWithObjects:doneButton, nil]];
+    _mpinTextField.inputAccessoryView = keyboardDoneButtonView;
+    _confirmMpinTextField.inputAccessoryView = keyboardDoneButtonView;
+}
 - (IBAction)confirmSetMpinAction:(id)sender{
     if ([self doValidation]) {
         NSLog(@" Login Status : %@",[[NSUserDefaults standardUserDefaults] objectForKey:@"LoginStatus"]);
@@ -80,6 +97,9 @@
     if (_mpinTextField.text.length == 0 || _confirmMpinTextField.text.length == 0) {
         [[AlertMessage sharedAlert] showAlertWithMessage:@"Please fill all the fields" withDelegate:nil onViewController:self];
         return NO;
+    }else if(_mpinTextField.text.length < 4 || _confirmMpinTextField.text.length < 4){
+        [[AlertMessage sharedAlert] showAlertWithMessage:@"Pin must be 4 digits." withDelegate:nil onViewController:self];
+        return NO;
     }else if (![_mpinTextField.text isEqualToString:_confirmMpinTextField.text]){
         [[AlertMessage sharedAlert] showAlertWithMessage:@"Pin and Confirm pin must be same" withDelegate:nil onViewController:self];
         return NO;
@@ -97,5 +117,19 @@
 - (BOOL)textFieldShouldReturn:(UITextField *)textField{
     [textField resignFirstResponder];
     return true;
+}
+
+- (BOOL)textField:(UITextField *)textField shouldChangeCharactersInRange:(NSRange)range replacementString:(NSString *)string  {
+    NSUInteger newLength = [textField.text length] + [string length] - range.length;
+    NSCharacterSet *cs = [[NSCharacterSet characterSetWithCharactersInString:NUMBERS_ONLY] invertedSet];
+    NSString *filtered = [[string componentsSeparatedByCharactersInSet:cs] componentsJoinedByString:@""];
+    return (([string isEqualToString:filtered])&&(newLength <= CHARACTER_LIMIT));
+}
+
+- (void)hideKeyboard{
+    if (activeTextField != nil) {
+        [activeTextField resignFirstResponder];
+        activeTextField = nil;
+    }
 }
 @end

@@ -8,15 +8,20 @@
 
 #import <UIKit/UIKit.h>
 #import "KidsListTableViewCell.h"
+@class AppDelegate;
 
 @protocol KidsListViewControllerProtocol <NSObject>
 
 - (void)addNewKid;
 
 @end
-@interface KidsListViewController : UIViewController
+@interface KidsListViewController : UIViewController{
+    AppDelegate *appDelegate;
+}
 
-@property (nonatomic, weak) NSArray *kidsArray;
+@property (nonatomic, strong) NSArray *kidsArray;
+@property (nonatomic, weak) IBOutlet UIView *addKidBackgroundView;
+@property (nonatomic, weak) IBOutlet NSLayoutConstraint *addKidBackgroundViewHeight;
 
 @property (nonatomic, strong) id<KidsListViewControllerProtocol> kidsListViewControllerDelegate;
 

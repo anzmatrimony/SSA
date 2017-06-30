@@ -307,6 +307,9 @@
         case ValidateEmail:
             requestString = [NSString stringWithFormat:@"%@http://49.207.0.196:8280/schoolRegistration/1.0/emailValidation?%@",BaseURL,inputParams];
             break;
+        case KidListForTeacher:
+            requestString = [NSString stringWithFormat:@"%@http://49.207.0.196:8280/kidInformation/v1/getKidInformation?%@",BaseURL,inputParams];
+            break;
         
         default:
             break;

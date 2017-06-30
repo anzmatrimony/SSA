@@ -14,6 +14,7 @@
 #import "ProgressHUD.h"
 #import "ServiceModel.h"
 #import "Parse.h"
+#import "Firebase.h"
 
 @interface LoginViewController (){
     UITextField *activeTextField;
@@ -136,7 +137,7 @@
                     if([[response objectForKey:@"body"] objectForKey:@"message"]){
                         [[AlertMessage sharedAlert] showAlertWithMessage:[[response objectForKey:@"body"] objectForKey:@"message"] withDelegate:nil onViewController:self];
                     }else{
-                        
+                       
                         [[NSUserDefaults standardUserDefaults] setObject:_userNameField.text forKey:UserName];
                         [[NSUserDefaults standardUserDefaults] setObject:_passwordField.text forKey:Password];
                         
@@ -145,8 +146,17 @@
                         [[NSUserDefaults standardUserDefaults] setObject:[[response objectForKey:@"body"] objectForKey:@"Role"] forKey:Role];
                         [[NSUserDefaults standardUserDefaults] setObject:[[response objectForKey:@"body"] objectForKey:@"status"] forKey:UserStatus];
                         NSLog(@" Login Status : %@",[[NSUserDefaults standardUserDefaults] objectForKey:@"LoginStatus"]);
+                        
+                        if([[[NSUserDefaults standardUserDefaults] objectForKey:Role] isEqualToString:@"CT"] || [[[NSUserDefaults standardUserDefaults] objectForKey:Role] isEqualToString:@"SU"]){
+                            [[NSUserDefaults standardUserDefaults] setObject:[[response objectForKey:@"body"] objectForKey:@"SchoolUniqueId"] forKey:schoolUniqueId];
+                            
+                            [[NSUserDefaults standardUserDefaults] setObject:[NSString stringWithFormat:@"%@ %@",[[response objectForKey:@"body"] objectForKey:@"firstName"],[[response objectForKey:@"body"] objectForKey:@"lastName"]] forKey:TeacherName];
+                        }
+                        
+                        [self registerInFireBase];
                         [[SharedManager sharedManager] showMPinScreen];
-                    }
+                        
+                    } 
                 }
                 NSLog(@"Response %@",response);
             }else{
@@ -156,6 +166,39 @@
     }];
 }
 
+/**
+ *@discussion creating user in firebase
+ */
+- (void)registerInFireBase{
+    [[FIRAuth auth] createUserWithEmail:_userNameField.text password:_passwordField.text completion:^(FIRUser *user, NSError *error){
+        if (error == nil) {
+            NSLog(@"User created successfully in firebase");
+            [self loginUserInFireBase];
+        }else{
+            NSDictionary *userInfo = [error userInfo];
+            NSString *errorName = [userInfo objectForKey:@"error_name"];
+            if (errorName != nil && [errorName isEqualToString:@"ERROR_EMAIL_ALREADY_IN_USE"]) {
+                [self loginUserInFireBase];
+                return ;
+            }
+            NSLog(@"Problem occured while creating user");
+            NSLog(@" Error : %@ ",error.localizedDescription);
+        }
+    }];
+}
+
+/**
+ *@discussion login user in firebase
+ */
+- (void)loginUserInFireBase{
+    [[FIRAuth auth] signInWithEmail:_userNameField.text password:_passwordField.text completion:^(FIRUser *user, NSError *error){
+        if (!error) {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                NSLog(@" user logged in successfully ");
+            });
+        }
+    }];
+}
 // Validating user inputs
 - (BOOL)doValidation{
     if (_userNameField.text.length == 0 || _passwordField.text.length == 0) {

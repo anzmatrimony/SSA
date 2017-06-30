@@ -15,6 +15,7 @@
 #import "AlertMessage.h"
 #import "ObjectManager.h"
 #import "SharedManager.h"
+#import "Firebase.h"
 
 @interface AddKidViewController ()<AlertMessageDelegateProtocol>{
     UITextField *activeTextField;

@@ -11,6 +11,10 @@
 #import "ActivitySectionHeaderView.h"
 #import "BaseViewController.h"
 
-@interface MessageViewController : BaseViewController
+@class AppDelegate;
 
+@interface MessageViewController : BaseViewController
+{
+    AppDelegate *appDelegate;
+}
 @end

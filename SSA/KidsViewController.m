@@ -14,6 +14,7 @@
 #import "Parse.h"
 #import "AlertMessage.h"
 #import "SharedManager.h"
+#import "Firebase.h"
 
 @interface KidsViewController ()<AlertMessageDelegateProtocol>
 {
@@ -21,7 +22,10 @@
     KidsListViewController *kidsListViewController;
     AddKidViewController *addKidViewController;
     UIStoryboard *storyboard;
+    FIRDatabaseReference *kidRef;
 }
+//private lazy var channelRef: DatabaseReference = Database.database().reference().child("channels")
+
 @property (nonatomic, weak) IBOutlet UIView *containerView;
 @end
 
@@ -30,7 +34,15 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     
+    kidRef = [[[FIRDatabase database] reference] child:@"Kids"];
+    
     appDelegate = [[UIApplication sharedApplication] delegate];
+    
+    self.tabBarItem.selectedImage = [[UIImage imageNamed:@"kids-blue.png"]
+                                     imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal];
+    
+    self.tabBarItem.image = [[UIImage imageNamed:@"kids-blue.png"]
+                             imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal];
 }
 
 - (void)viewWillAppear:(BOOL)animated{
@@ -68,6 +80,7 @@
             if (!error) {
                 NSLog(@" Response  : %@", response);
                 kidsArray = (NSMutableArray *)[[Parse sharedParse] parseKidsListResponse:[response objectForKey:@"body"]];
+                [self addKidsInFirebaseIfNotAdded];
                 [self chooseContentView];
             }else{
                 if ([error.localizedDescription isEqualToString:TokenExpiredString]) {
@@ -82,6 +95,33 @@
     }];
 }
 
+- (void)addKidsInFirebaseIfNotAdded{
+    //NSString *uid = [[[FIRAuth auth] currentUser] uid];
+    //FIRDatabaseReference *newKidRef = [kidRef child:uid];
+//    for (KID_MODEL *kid in kidsArray) {
+//        
+//        FIRDatabaseReference *newKidRef = [kidRef child:kid.kidId];
+//        
+//        [newKidRef setValue:@{@"kidId":kid.kidId, @"kidName":kid.firstName, @"schoolUniqueId":kid.SchoolUniqueId, @"parentId":kid.parentUserRef,@"messages":@""}];
+//        /*[[[kidRef queryOrderedByChild:@"kidId"] queryEqualToValue:kid.kidId] observeEventType:FIRDataEventTypeValue withBlock:^(FIRDataSnapshot *snapShot){
+//            if ([snapShot value] == nil) {
+//                [kidRef setValue:@{@"kidId":kid.kidId}];
+//            }
+//        }];*/
+//    }
+    
+    FIRDatabaseReference *ref = [[FIRDatabase database] reference];
+    
+    for (KID_MODEL *kid in kidsArray) {
+        [[ref child:@"Kids"] observeEventType:FIRDataEventTypeValue withBlock:^(FIRDataSnapshot *snapShot){
+            if (![snapShot hasChild:kid.kidId]) {
+                FIRDatabaseReference *newKidRef;
+                newKidRef = [kidRef child:kid.kidId];
+                [newKidRef setValue:@{@"kidId":kid.kidId, @"kidName":kid.firstName, @"schoolUniqueId":kid.SchoolUniqueId, @"parentId":kid.parentUserRef,@"messages":@""}];
+            }
+        }];
+    }
+}
 - (void)showKidsListView{
     //[self removeAndReloadView];
     if (!kidsListViewController) {

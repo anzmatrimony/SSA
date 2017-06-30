@@ -12,6 +12,7 @@
 #import "MpinViewController.h"
 #import "EnterPinViewController.h"
 #import "Constants.h"
+#import "KidsListViewController.h"
 
 @implementation SharedManager{
     UIViewController *viewController;
@@ -20,6 +21,7 @@
     UINavigationController *navigationController;
     MpinViewController *mPinViewController;
     EnterPinViewController *enterPinViewController;
+    KidsListViewController *kidsListViewController;
 }
 
 static SharedManager *singleTonManager;
@@ -92,13 +94,26 @@ static SharedManager *singleTonManager;
         navigationController = nil;
     }
     
+    if (kidsListViewController) {
+        kidsListViewController = nil;
+    }
     UIWindow *mainWindow = [[[UIApplication sharedApplication] delegate] window];
     NSString * storyboardName = @"Main";
     UIStoryboard *storyboard = [UIStoryboard storyboardWithName:storyboardName bundle: nil];
+    
+    // Showing kids list when teacher / school user loges in
+    if([[[NSUserDefaults standardUserDefaults] objectForKey:Role] isEqualToString:@"CT"] || [[[NSUserDefaults standardUserDefaults] objectForKey:Role] isEqualToString:@"SU"]){
+        kidsListViewController = [storyboard instantiateViewControllerWithIdentifier:@"KidsListViewController"];
+        
+        navigationController = [[UINavigationController alloc] initWithRootViewController:kidsListViewController];
+        
+        [mainWindow setRootViewController:navigationController];
+        [mainWindow makeKeyAndVisible];
+        return;
+    }
+    
+    // Showing tabs when parent loges in
     tabBarController = [storyboard instantiateViewControllerWithIdentifier:@"TabsViewController"];
-    
-    //navigationController = [[UINavigationController alloc] initWithRootViewController:tabBarController];
-    
     [mainWindow setRootViewController:tabBarController];
     [mainWindow makeKeyAndVisible];
 }

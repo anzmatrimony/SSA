@@ -96,6 +96,30 @@ static Parse *singleTonManager;
 }
 
 /**
+ * @Discussion Parsing the schools list retrieved from the server
+ * @Param responseArray as a NSArray Objcet
+ * @Return NSArray object
+ **/
+- (NSArray *)parseKidsListResponseForTeacherLogIn:(NSArray *)responseArray{
+    if (![self checkArrayList:responseArray]) {
+        return nil;
+    }
+    NSMutableArray *kidsListArray = [[NSMutableArray alloc] init];
+    for (NSDictionary *kidDict in responseArray) {
+        KID_MODEL *kid = [[KID_MODEL alloc] init];
+        kid.firstName = [self nullCheckForTheKey:@"KidName" In:kidDict] ? @"" : [kidDict objectForKey:@"KidName"];
+        
+        kid.kidId = [self nullCheckForTheKey:@"kidId" In:kidDict] ? @"" : [kidDict objectForKey:@"kidId"];
+        kid.kidClass = [self nullCheckForTheKey:@"Class" In:kidDict] ? @"" : [kidDict objectForKey:@"Class"];
+        kid.Image = [self nullCheckForTheKey:@"Image" In:kidDict] ? @"" : [kidDict objectForKey:@"Image"];
+        
+        [kidsListArray addObject:kid];
+    }
+    
+    return kidsListArray;
+}
+
+/**
  * @Discussion Checking weather received object is an Array or not
  * @Param array as an NSArray object
  * @Return Boolean value

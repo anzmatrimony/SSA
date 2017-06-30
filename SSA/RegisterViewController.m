@@ -12,6 +12,7 @@
 #import "AlertMessage.h"
 #import "ProgressHUD.h"
 #import "ServiceModel.h"
+#import "Firebase.h"
 
 
 @interface RegisterViewController (){
@@ -71,6 +72,7 @@
     
     [self buildAgreeTextViewFromString:NSLocalizedString(@"I accept #<ts>Terms and Conditions# and #<pp>Privacy Policy#",
                                                          @"PLEASE NOTE: please translate \"Terms and Conditions\" and \"Privacy Policy\" as well, and leave the #<ts># and #<pp># around your translations just as in the English version of this message.")];
+    [self getAccessToken];
 }
 
 - (void)viewDidAppear:(BOOL)animated{
@@ -291,7 +293,7 @@
             [[ProgressHUD sharedProgressHUD] removeHUD];
             if (!error) {
                 if ([[response objectForKey:@"body"] objectForKey:@"message"]) {
-                    
+                    [self registerInFireBase];
                     NSLog(@" Message %@", [[response objectForKey:@"body"] objectForKey:@"message"]);
                     [self.navigationController popToRootViewControllerAnimated:YES];
                 }
@@ -305,6 +307,20 @@
 }
 
 /**
+ *@discussion creating user in firebase
+ */
+- (void)registerInFireBase{
+    [[FIRAuth auth] createUserWithEmail:_emailField.text password:_passwordFiedl.text completion:^(FIRUser *user, NSError *error){
+        if (error == nil) {
+            NSLog(@"User created successfully in firebase");
+        }else{
+            NSLog(@"Problem occured while creating user");
+            NSLog(@" Error : %@ ",error.localizedDescription);
+        }
+    }];
+}
+
+/**
  *@discussion getting access token for registration
  */
 - (void)getAccessToken{
@@ -314,9 +330,9 @@
             [[ProgressHUD sharedProgressHUD] removeHUD];
             if (!error) {
                 if ([response objectForKey:@"access_token"]) {
-                    [self checkEmailExistence];
-                    //[self registerParentWithToken:[response objectForKey:@"access_token"]];
                     [[NSUserDefaults standardUserDefaults] setObject:[response objectForKey:@"access_token"] forKey:AccessToken];
+                    //[self checkEmailExistence];
+                    //[self registerParentWithToken:[response objectForKey:@"access_token"]];
                 }else{
                     [[AlertMessage sharedAlert] showAlertWithMessage:@"Some thing went wrong. Please try again later." withDelegate:nil onViewController:self];
                 }
@@ -361,7 +377,8 @@
 - (void)textFieldDidEndEditing:(UITextField *)textField{
     if (textField.tag == 100) {
         [textField resignFirstResponder];
-        [self getAccessToken];
+        //[self getAccessToken];
+        [self checkEmailExistence];
     }
     activeTextField = nil;
 }
