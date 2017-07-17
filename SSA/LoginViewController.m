@@ -15,6 +15,8 @@
 #import "ServiceModel.h"
 #import "Parse.h"
 #import "Firebase.h"
+#import "MpinViewController.h"
+#import "ForgotPasswordViewController.h"
 
 @interface LoginViewController (){
     UITextField *activeTextField;
@@ -86,7 +88,7 @@
 - (IBAction)loginAction:(id)sender{
     if ([self doValidation]) {
         [[ProgressHUD sharedProgressHUD] showActivityIndicatorOnView:self.view];
-        [ServiceModel getTokenWithUserName:_userNameField.text AndPassword:_passwordField.text GetAccessToken:^(NSDictionary *response, NSError *error){
+        [ServiceModel getTokenWithUserName:[_userNameField.text lowercaseString] AndPassword:_passwordField.text GetAccessToken:^(NSDictionary *response, NSError *error){
             dispatch_async(dispatch_get_main_queue(), ^{
                 [[ProgressHUD sharedProgressHUD] removeHUD];
                 if (!error) {
@@ -103,7 +105,7 @@
                     }
                     NSLog(@"Response %@",response);
                 }else{
-                    [[AlertMessage sharedAlert] showAlertWithMessage:error.localizedDescription withDelegate:nil onViewController:self];
+                    [[AlertMessage sharedAlert] showAlertWithMessage:@"Invalid Credentials" withDelegate:nil onViewController:self];
                 }
             });
         }];
@@ -118,7 +120,10 @@
 }
 
 - (IBAction)forgotPasswordAction:(id)sender{
-    // show forgot password screen
+//    // show forgot password screen
+//    UIStoryboard *storyboard = [UIStoryboard storyboardWithName:@"Main" bundle: nil];
+//    ForgotPasswordViewController *forgotPasswordViewController = [storyboard instantiateViewControllerWithIdentifier:@"ForgotPasswordViewController"];
+//    [self.navigationController pushViewController:forgotPasswordViewController animated:YES];
 }
 
 /**
@@ -154,8 +159,11 @@
                         }
                         
                         [self registerInFireBase];
-                        [[SharedManager sharedManager] showMPinScreen];
+                        //[[SharedManager sharedManager] showMPinScreen];
                         
+                        UIStoryboard *storyboard = [UIStoryboard storyboardWithName:@"Main" bundle: nil];
+                        MpinViewController *mPinViewController = [storyboard instantiateViewControllerWithIdentifier:@"MpinViewController"];
+                        [self.navigationController pushViewController:mPinViewController animated:YES];
                     } 
                 }
                 NSLog(@"Response %@",response);

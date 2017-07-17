@@ -121,6 +121,9 @@
         case ConfirmSchool:
             requestString = [NSString stringWithFormat:@"%@http://49.207.0.196:8280/addingSchools/v1/parentSchoolRegistration",BaseURL];
             break;
+        case ForgotPassword:
+            requestString = [NSString stringWithFormat:@"%@http://49.207.0.196:8280/forgetpasword/1.0/forgotPassword",BaseURL];
+            break;
         
         default:
             break;
@@ -309,6 +312,9 @@
             break;
         case KidListForTeacher:
             requestString = [NSString stringWithFormat:@"%@http://49.207.0.196:8280/kidInformation/v1/getKidInformation?%@",BaseURL,inputParams];
+            break;
+        case GetActivitiesList:
+            requestString = [NSString stringWithFormat:@"%@http://49.207.0.196:8280/kidActivityInformation/v1/getKidActivityInformation?%@",BaseURL,inputParams];
             break;
         
         default:

@@ -22,6 +22,7 @@
     NSString *selectedSchool,*selectedClass,*selectedSection,*selectedRelation;
     NSArray *classListArray,*sectionsListArray,*relationShipListArray;
     NSMutableArray *schoolsListArray;
+    BOOL addKidStatus;
 }
 
 @property (nonatomic, weak) IBOutlet UITextField *firstNameField,*lastNameField;
@@ -41,13 +42,13 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     
+    addKidStatus  = false;
     appDelegate = [[UIApplication sharedApplication] delegate];
     [appDelegate initializeLocationManager];
     schoolsListArray = [[NSMutableArray alloc] init];
     
-    
-    classListArray = [[NSArray alloc] initWithObjects:@"UKG",@"LKG",@"First Class",@"Second Class",@"Third Class",@"Fourth Class",@"Fifth Class", nil];
-    sectionsListArray = [[NSArray alloc] initWithObjects:@"Section1",@"Section2",@"Section3", nil];
+    classListArray = [[NSArray alloc] initWithObjects:@"LKG",@"UKG",@"FIRST CLASS",@"SECOND CLASS",@"THIRD CLASS",@"FOURTH CLASS",@"FIFTH CLASS",@"SIXTH CLASS",@"SEVENTH CLASS",@"EIGTH CLASS",@"NINTH CLASS", @"TENTH CLASS", nil];
+    sectionsListArray = [[NSArray alloc] initWithObjects:@"SECTION-A",@"SECTION-B",@"SECTION-C",@"SECTION-D", nil];
     relationShipListArray = [[NSArray alloc] initWithObjects:@"Father",@"Mother", nil];
     
     [_addKidImageView.layer setCornerRadius:20];
@@ -155,14 +156,9 @@
 }
 
 - (void)moveToPreviousScreen{
-    if ([self.addKidViewControllerDelegate respondsToSelector:@selector(didKidAddedWithKidName:AndSchoolName:)]) {
-        [self.addKidViewControllerDelegate didKidAddedWithKidName:[NSString stringWithFormat:@"%@ %@",_firstNameField.text,_lastNameField.text] AndSchoolName:[[_schoolButton titleLabel] text]];
-    }
+    addKidStatus = true;
+    [[AlertMessage sharedAlert] showAlertWithMessage:@"Kid added successfully" withDelegate:self onViewController:self];
     
-    if ([self isFromKidsListPage]) {
-        self.fromKidsListPage = false;
-        [self.navigationController popViewControllerAnimated:YES];
-    }
 }
 - (IBAction)dropDownSelectionAction:(id)sender{
     [activeTextField resignFirstResponder];
@@ -299,7 +295,19 @@
 
 #pragma mark AlertMessageDelegateProtocol methods
 - (void)clickedOkButton{
-    [[SharedManager sharedManager] logoutTheUser];
-    [[SharedManager sharedManager] showLoginScreen];
+    if (addKidStatus) {
+        if ([self.addKidViewControllerDelegate respondsToSelector:@selector(didKidAddedWithKidName:AndSchoolName:)]) {
+            [self.addKidViewControllerDelegate didKidAddedWithKidName:[NSString stringWithFormat:@"%@ %@",_firstNameField.text,_lastNameField.text] AndSchoolName:[[_schoolButton titleLabel] text]];
+        }
+        
+        if ([self isFromKidsListPage]) {
+            self.fromKidsListPage = false;
+            [self.navigationController popViewControllerAnimated:YES];
+        }
+    }else{
+        [[SharedManager sharedManager] logoutTheUser];
+        [[SharedManager sharedManager] showLoginScreen];
+    }
+    
 }
 @end

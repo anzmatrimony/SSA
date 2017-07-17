@@ -46,5 +46,24 @@
 @property (strong, nonatomic) NSString* parentUserRef;
 @property (strong, nonatomic) NSString* SchoolUniqueId;
 @property (strong, nonatomic) NSString* createdBy;
-
+@property (strong, nonatomic) NSString* unreadMessagesCount;
+@property (strong, nonatomic) NSArray * activities;
 @end
+
+@interface KidActivitiesModel : NSObject
+
+@property(nonatomic, strong) NSString *KidName;
+@property(nonatomic, strong) NSString *SchoolUniqueId;
+@property(nonatomic, strong) NSString *activityID;
+@property(nonatomic, strong) NSString *activitysubject;
+@property(nonatomic, strong) NSString *kiduserID;
+@property(nonatomic, strong) NSString *rowid;
+@property(nonatomic, strong) NSString *status;
+@property(nonatomic, strong) NSString *statusupdateon;
+@property(nonatomic, strong) NSString *teacheruserref;
+@property(nonatomic, strong) NSString *templateID;
+@property(nonatomic, strong) NSString *templatename;
+@property(nonatomic, strong) NSString *userId;
+@end
+
+

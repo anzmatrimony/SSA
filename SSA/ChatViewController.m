@@ -13,8 +13,9 @@
 @interface ChatViewController ()
 {
     FIRDatabaseReference *kidRef;
-    FIRDatabaseReference *messagesRef;
+    FIRDatabaseReference *messagesRef, *messagesRef1;
     FIRDatabaseHandle newMessageHandle,messagesListHandle;
+    BOOL newMessagesOnTop;
 }
 @end
 
@@ -57,7 +58,67 @@
      *  self.inputToolbar.maximumHeight = 150;
      */
     
-    [self observeMessages];
+    //[self observeMessages];
+    
+    // Decide whether or not to reverse the messages
+    newMessagesOnTop = NO;
+    
+    // This allows us to check if these were messages already stored on the server
+    // when we booted up (YES) or if they are new messages since we've started the app.
+    // This is so that we can batch together the initial messages' reloadData for a perf gain.
+    __block BOOL initialAdds = YES;
+    
+    [messagesRef observeEventType:FIRDataEventTypeChildAdded withBlock:^(FIRDataSnapshot *snapshot) {
+        
+        NSDictionary *postDict = snapshot.value;
+        if ([postDict isEqual:[NSNull null]]) {
+            return ;
+        }
+        
+        if ([postDict objectForKey:@"text"] != nil && [[postDict objectForKey:@"text"] length] != 0) {
+            JSQMessage *message = [[JSQMessage alloc] initWithSenderId:[postDict objectForKey:@"senderId"]
+                                                     senderDisplayName:[postDict objectForKey:@"senderName"]
+                                                                  date:[NSDate date]
+                                                                  text:[postDict objectForKey:@"text"]];
+            if (newMessagesOnTop) {
+                [messages insertObject:message atIndex:0];
+            } else {
+                [messages addObject:message];
+            }
+            
+            
+        }
+        // Reload the table view so the new message will show up.
+        if (!initialAdds) {
+            //[self.tableView reloadData];
+            [self finishReceivingMessage];
+        }
+    }];
+    
+    // Value event fires right after we get the events already stored in the Firebase repo.
+    // We've gotten the initial messages stored on the server, and we want to run reloadData on the batch.
+    // Also set initialAdds=NO so that we'll reload after each additional childAdded event.
+    [messagesRef observeSingleEventOfType:FIRDataEventTypeValue withBlock:^(FIRDataSnapshot *snapshot) {
+        // Reload the table view so that the intial messages show up
+        
+        [self finishReceivingMessage];
+        initialAdds = NO;
+    }];
+    
+    messagesRef1 = [kidRef child:@"messages"];
+    [[[messagesRef1 queryOrderedByChild:@"status"] queryEqualToValue:@"sent"] observeEventType:FIRDataEventTypeValue withBlock:^(FIRDataSnapshot *snapShot1){
+        NSLog(@"sent messages : %@",snapShot1.value);
+        if (snapShot1.value != nil && ![snapShot1.value isEqual:[NSNull null]]) {
+            NSDictionary *mesgDict = snapShot1.value;
+            for (NSString *key in [mesgDict allKeys]) {
+                NSDictionary *dict = [mesgDict objectForKey:key];
+                if (![self.senderId isEqualToString:[dict objectForKey:@"senderId"]]) {
+                    FIRDatabaseReference *particularMessagesRef1 = [messagesRef1 child:key];
+                    [particularMessagesRef1 updateChildValues:@{@"status" : @"seen"}];
+                }
+            }
+        }
+    }];
 }
 
 - (void)viewDidAppear:(BOOL)animated
@@ -70,6 +131,12 @@
      *  Note: this feature is mostly stable, but still experimental
      */
     self.collectionView.collectionViewLayout.springinessEnabled = false;
+}
+
+- (void)viewWillDisappear:(BOOL)animated{
+    [super viewWillDisappear:animated];
+    [messagesRef removeAllObservers];
+    [messagesRef1 removeAllObservers];
 }
 
 - (void)didReceiveMemoryWarning {
@@ -101,7 +168,6 @@
                                                                           date:[NSDate date]
                                                                           text:[dataDict objectForKey:@"text"]];
                     [messages addObject:message];
-                    
                 }
             }
             [self finishReceivingMessage];
@@ -174,7 +240,7 @@
     // [JSQSystemSoundPlayer jsq_playMessageSentSound];
     
     FIRDatabaseReference *mesageItemRef = [messagesRef childByAutoId];
-    [mesageItemRef setValue:@{@"senderId":senderId, @"senderName":senderDisplayName, @"text":text}];
+    [mesageItemRef setValue:@{@"senderId":senderId, @"senderName":senderDisplayName, @"text":text, @"status":@"sent"}];
     /*JSQMessage *message = [[JSQMessage alloc] initWithSenderId:senderId
                                              senderDisplayName:senderDisplayName
                                                           date:date

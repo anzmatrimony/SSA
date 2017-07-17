@@ -7,6 +7,12 @@
 //
 
 #import "ActivitiesViewController.h"
+#import "ProgressHUD.h"
+#import "ServiceModel.h"
+#import "Parse.h"
+#import "AppDelegate.h"
+#import "AlertMessage.h"
+#import "Parse.h"
 
 @interface ActivitiesViewController ()
 {
@@ -26,16 +32,23 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     
+    appDelegate = [[UIApplication sharedApplication] delegate];
     NSString * storyboardName = @"Main";
     storyboard = [UIStoryboard storyboardWithName:storyboardName bundle: nil];
     
-    [self showKids];
+    //[self showKids];
+    [self showActivities];
+}
+
+- (void)viewWillAppear:(BOOL)animated{
+    //[self fetchKidsActivitiesList];
 }
 
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
 }
+
 
 - (void)showKids{
     [self removeAndReloadView];

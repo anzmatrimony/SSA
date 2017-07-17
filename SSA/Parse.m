@@ -88,6 +88,7 @@ static Parse *singleTonManager;
         kid.Image = [self nullCheckForTheKey:@"Image" In:kidDict] ? @"" : [kidDict objectForKey:@"Image"];
         kid.parentUserRef = [self nullCheckForTheKey:@"parentUserRef" In:kidDict] ? @"" : [kidDict objectForKey:@"parentUserRef"];
         kid.SchoolUniqueId = [self nullCheckForTheKey:@"SchoolUniqueId" In:kidDict] ? @"" : [kidDict objectForKey:@"SchoolUniqueId"];
+        kid.unreadMessagesCount = @"0";
         
         [kidsListArray addObject:kid];
     }
@@ -108,10 +109,12 @@ static Parse *singleTonManager;
     for (NSDictionary *kidDict in responseArray) {
         KID_MODEL *kid = [[KID_MODEL alloc] init];
         kid.firstName = [self nullCheckForTheKey:@"KidName" In:kidDict] ? @"" : [kidDict objectForKey:@"KidName"];
+        kid.lastName = @"";
         
         kid.kidId = [self nullCheckForTheKey:@"kidId" In:kidDict] ? @"" : [kidDict objectForKey:@"kidId"];
         kid.kidClass = [self nullCheckForTheKey:@"Class" In:kidDict] ? @"" : [kidDict objectForKey:@"Class"];
         kid.Image = [self nullCheckForTheKey:@"Image" In:kidDict] ? @"" : [kidDict objectForKey:@"Image"];
+        kid.unreadMessagesCount = @"0";
         
         [kidsListArray addObject:kid];
     }
@@ -119,6 +122,64 @@ static Parse *singleTonManager;
     return kidsListArray;
 }
 
+/**
+ * @Discussion Parsing the kids activities list retrieved from the server
+ * @Param responseArray as a NSArray Objcet
+ * @Return NSArray object
+ **/
+- (NSArray *)parseKidsActivities:(NSArray *)responseArray{
+    if (![self checkArrayList:responseArray]) {
+        return nil;
+    }
+    NSMutableArray *kidsListArray = [[NSMutableArray alloc] init];
+    for (NSDictionary *kidDict in responseArray) {
+        KID_MODEL *kid = [[KID_MODEL alloc] init];
+        kid.firstName = [self nullCheckForTheKey:@"kidName" In:kidDict] ? @"" : [kidDict objectForKey:@"kidName"];
+        kid.lastName = @"";
+        
+        kid.kidId = [self nullCheckForTheKey:@"kiduserID" In:kidDict] ? @"" : [kidDict objectForKey:@"kiduserID"];
+        kid.activities = [self getKidActivities:[kidDict objectForKey:@"data"]];
+        
+        [kidsListArray addObject:kid];
+    }
+    
+    return kidsListArray;
+}
+
+- (NSArray *)getKidActivities:(NSArray *)activities{
+    if (![self checkArrayList:activities]) {
+        return nil;
+    }
+    NSArray *tempActivitiesArray;
+    if (activities.count > 0) {
+        if ([[activities objectAtIndex:0] isKindOfClass:[NSArray class]]) {
+            tempActivitiesArray  = [activities objectAtIndex:0];
+        }else{
+            tempActivitiesArray = activities;
+        }
+    }else{
+        return nil;
+    }
+    
+    NSMutableArray *activitiesArray = [[NSMutableArray alloc] init];
+    for (NSDictionary *activityDict in tempActivitiesArray) {
+        KidActivitiesModel *activity = [[KidActivitiesModel alloc] init];
+        activity.KidName = [activityDict objectForKey:@"KidName"];
+        activity.SchoolUniqueId = [activityDict objectForKey:@"SchoolUniqueId"];
+        activity.activityID = [activityDict objectForKey:@"activityID"];
+        activity.activitysubject = [activityDict objectForKey:@"activitysubject"];
+        activity.kiduserID = [activityDict objectForKey:@"kiduserID"];
+        activity.rowid = [activityDict objectForKey:@"rowid"];
+        activity.status = [activityDict objectForKey:@"status"];
+        activity.statusupdateon = [activityDict objectForKey:@"statusupdateon"];
+        activity.teacheruserref = [activityDict objectForKey:@"teacheruserref"];
+        activity.templateID = [activityDict objectForKey:@"templateID"];
+        activity.templatename = [activityDict objectForKey:@"templatename"];
+        activity.userId = [activityDict objectForKey:@"userId"];
+        [activitiesArray addObject:activity];
+    }
+    return activitiesArray;
+}
 /**
  * @Discussion Checking weather received object is an Array or not
  * @Param array as an NSArray object

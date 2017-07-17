@@ -15,7 +15,7 @@
 #import "Firebase.h"
 
 
-@interface RegisterViewController (){
+@interface RegisterViewController ()<AlertMessageDelegateProtocol>{
     UITextField *activeTextField;
     BOOL isAgreedToTermsAndConditions;
     BOOL isGenderMale;
@@ -279,7 +279,7 @@
     [mainDict setObject:headersDict forKey:@"header"];
     
     NSMutableDictionary *bodyDict = [[NSMutableDictionary alloc] init];
-    [bodyDict setObject:_emailField.text forKey:@"userId"];
+    [bodyDict setObject:[_emailField.text lowercaseString] forKey:@"userId"];
     [bodyDict setObject:_firstNameField.text forKey:@"firstName"];
     [bodyDict setObject:_lastNameField.text forKey:@"lastName"];
     [bodyDict setObject:_passwordFiedl.text forKey:@"password"];
@@ -295,7 +295,8 @@
                 if ([[response objectForKey:@"body"] objectForKey:@"message"]) {
                     [self registerInFireBase];
                     NSLog(@" Message %@", [[response objectForKey:@"body"] objectForKey:@"message"]);
-                    [self.navigationController popToRootViewControllerAnimated:YES];
+                    [[AlertMessage sharedAlert] showAlertWithMessage:@"Registration successfull" withDelegate:self onViewController:self];
+                    //[self.navigationController popToRootViewControllerAnimated:YES];
                 }
                 NSLog(@" Response  : %@", response);
             }else{
@@ -320,7 +321,7 @@
     }];
 }
 
-/**
+/**77
  *@discussion getting access token for registration
  */
 - (void)getAccessToken{
@@ -357,7 +358,7 @@
                 NSLog(@"email validdatio response %@", response);
                 if ([response objectForKey:@"result"]) {
                     isEmailValidated = false;
-                    [[AlertMessage sharedAlert] showAlertWithMessage:@"EmailID already exist. Please try another." withDelegate:nil onViewController:self];
+                    [[AlertMessage sharedAlert] showAlertWithMessage:@"Entered emailid already exist. Please try another valid email." withDelegate:nil onViewController:self];
                    
                 }else{
                     isEmailValidated = true;
@@ -380,10 +381,27 @@
         //[self getAccessToken];
         [self checkEmailExistence];
     }
+    if (textField.tag == 300) {
+        if (_passwordFiedl.text != _confirmPasswordField.text) {
+            [[AlertMessage sharedAlert] showAlertWithMessage:@"Password and confirm password must be same" withDelegate:nil onViewController:self];
+        }
+    }
+    
+    if (textField.tag == 200) {
+        if (_confirmPasswordField.text.length > 0) {
+            if (_passwordFiedl.text != _confirmPasswordField.text) {
+                [[AlertMessage sharedAlert] showAlertWithMessage:@"Password and confirm password must be same" withDelegate:nil onViewController:self];
+            }
+        }
+    }
     activeTextField = nil;
 }
 - (BOOL)textFieldShouldReturn:(UITextField *)textField{
     [textField resignFirstResponder];
     return true;
 }
-@end
+
+- (void)clickedOkButton
+{
+    [self.navigationController popToRootViewControllerAnimated:YES];
+}@end

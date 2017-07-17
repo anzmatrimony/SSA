@@ -9,7 +9,12 @@
 #import <UIKit/UIKit.h>
 #import "ActivitySectionHeaderView.h"
 #import "ActivitiesListTableViewCell.h"
-@interface ActivitiesListViewController : UIViewController
+#import "BaseViewController.h"
 
+@class AppDelegate;
+@interface ActivitiesListViewController : BaseViewController
+{
+    AppDelegate *appDelegate;
+}
 
 @end

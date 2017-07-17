@@ -80,7 +80,7 @@
             if (!error) {
                 NSLog(@" Response  : %@", response);
                 kidsArray = (NSMutableArray *)[[Parse sharedParse] parseKidsListResponse:[response objectForKey:@"body"]];
-                [self addKidsInFirebaseIfNotAdded];
+                //[self addKidsInFirebaseIfNotAdded];
                 [self chooseContentView];
             }else{
                 if ([error.localizedDescription isEqualToString:TokenExpiredString]) {
@@ -96,19 +96,6 @@
 }
 
 - (void)addKidsInFirebaseIfNotAdded{
-    //NSString *uid = [[[FIRAuth auth] currentUser] uid];
-    //FIRDatabaseReference *newKidRef = [kidRef child:uid];
-//    for (KID_MODEL *kid in kidsArray) {
-//        
-//        FIRDatabaseReference *newKidRef = [kidRef child:kid.kidId];
-//        
-//        [newKidRef setValue:@{@"kidId":kid.kidId, @"kidName":kid.firstName, @"schoolUniqueId":kid.SchoolUniqueId, @"parentId":kid.parentUserRef,@"messages":@""}];
-//        /*[[[kidRef queryOrderedByChild:@"kidId"] queryEqualToValue:kid.kidId] observeEventType:FIRDataEventTypeValue withBlock:^(FIRDataSnapshot *snapShot){
-//            if ([snapShot value] == nil) {
-//                [kidRef setValue:@{@"kidId":kid.kidId}];
-//            }
-//        }];*/
-//    }
     
     FIRDatabaseReference *ref = [[FIRDatabase database] reference];
     
@@ -118,6 +105,24 @@
                 FIRDatabaseReference *newKidRef;
                 newKidRef = [kidRef child:kid.kidId];
                 [newKidRef setValue:@{@"kidId":kid.kidId, @"kidName":kid.firstName, @"schoolUniqueId":kid.SchoolUniqueId, @"parentId":kid.parentUserRef,@"messages":@""}];
+            }else{
+                FIRDatabaseReference *existingKidRef;
+                existingKidRef = [kidRef child:kid.kidId];
+                FIRDatabaseReference *messagesRef = [existingKidRef child:@"messages"];
+                [[[messagesRef queryOrderedByChild:@"status"] queryEqualToValue:@"sent"] observeEventType:FIRDataEventTypeValue withBlock:^(FIRDataSnapshot *snapShot1){
+                    NSLog(@"sent messages : %@",snapShot1.value);
+                    if (snapShot1.value != nil && ![snapShot1.value isEqual:[NSNull null]]) {
+                        NSDictionary *mesgDict = snapShot1.value;
+                        NSMutableArray *messagesArray = [[NSMutableArray alloc] init];
+                        for (NSString *key in [mesgDict allKeys]) {
+                            [messagesArray addObject:[mesgDict objectForKey:key]];
+                        }
+                        
+                        NSArray *tempArray = [messagesArray filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"senderId != %@",kid.kidId]];
+                        kid.unreadMessagesCount = [NSString stringWithFormat:@"%lu",(unsigned long)tempArray.count];
+                        NSLog(@" Un read messages count : %lu", tempArray.count);
+                    }
+                }];
             }
         }];
     }
@@ -158,7 +163,9 @@
 
 #pragma mark AddKidViewControllerProtocol methods
 - (void)didKidAddedWithKidName:(NSString *)kidName AndSchoolName:(NSString *)schoolName{
+    
     [self fetchKidsList];
+    //[[AlertMessage sharedAlert] showAlertWithMessage:@"Kid added successfully" withDelegate:nil onViewController:self];
 }
 
 #pragma mark KidsListViewControllerProtocol methods

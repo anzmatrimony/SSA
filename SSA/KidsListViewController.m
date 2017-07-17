@@ -96,20 +96,46 @@
 }
 
 - (void)addKidsInFirebaseIfNotAdded{
-    //NSString *uid = [[[FIRAuth auth] currentUser] uid];
-    //FIRDatabaseReference *newKidRef = [kidRef child:uid];
-    FIRDatabaseReference *ref = [[FIRDatabase database] reference];
     
+    FIRDatabaseReference *ref = [[FIRDatabase database] reference];
+    int i = 0;
     for (KID_MODEL *kid in _kidsArray) {
         [[ref child:@"Kids"] observeEventType:FIRDataEventTypeValue withBlock:^(FIRDataSnapshot *snapShot){
             if (![snapShot hasChild:kid.kidId]) {
                 FIRDatabaseReference *newKidRef;
                 newKidRef = [kidRef child:kid.kidId];
                 [newKidRef setValue:@{@"kidId":kid.kidId, @"kidName":kid.firstName, @"schoolUniqueId":[[NSUserDefaults standardUserDefaults] objectForKey:schoolUniqueId], @"parentId":@"",@"messages":@""}];
+            }else{
+                FIRDatabaseReference *existingKidRef;
+                existingKidRef = [kidRef child:kid.kidId];
+                FIRDatabaseReference *messagesRef = [existingKidRef child:@"messages"];
+                [[[messagesRef queryOrderedByChild:@"status"] queryEqualToValue:@"sent"] observeEventType:FIRDataEventTypeValue withBlock:^(FIRDataSnapshot *snapShot1){
+                    NSLog(@"sent messages : %@",snapShot1.value);
+                    if (snapShot1.value != nil && ![snapShot1.value isEqual:[NSNull null]]) {
+                        NSDictionary *mesgDict = snapShot1.value;
+                        NSMutableArray *messagesArray = [[NSMutableArray alloc] init];
+                        for (NSString *key in [mesgDict allKeys]) {
+                            [messagesArray addObject:[mesgDict objectForKey:key]];
+                        }
+                        
+                        NSArray *tempArray = [messagesArray filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"senderId == %@",kid.kidId]];
+                        kid.unreadMessagesCount = [NSString stringWithFormat:@"%lu",(unsigned long)tempArray.count];
+                        NSLog(@" Un read messages count : %lu", tempArray.count);
+                        
+                        dispatch_async(dispatch_get_main_queue(), ^{
+//                            NSIndexPath *indexPath = [NSIndexPath indexPathForRow:i inSection:0];
+//                            NSArray *indexPaths = [[NSArray alloc] initWithObjects:indexPath, nil];
+//                            [self.tableView reloadRowsAtIndexPaths:indexPaths withRowAnimation:UITableViewRowAnimationNone];
+                            [self.tableView reloadData];
+                        });
+                    }
+                }];
             }
         }];
+        i = i + 1;
     }
 }
+
 
 - (void)updateKidsList{
     [self.tableView reloadData];

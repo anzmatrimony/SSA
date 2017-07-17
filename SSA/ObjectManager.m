@@ -19,3 +19,7 @@
 @implementation KID_MODEL
 
 @end
+
+@implementation KidActivitiesModel
+
+@end

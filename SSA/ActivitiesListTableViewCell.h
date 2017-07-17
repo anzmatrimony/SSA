@@ -7,10 +7,13 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "ObjectManager.h"
 
 @interface ActivitiesListTableViewCell : UITableViewCell
 
 @property (nonatomic, weak) IBOutlet UIView *dataView;
 @property (nonatomic, weak) IBOutlet UILabel *activityLabel,*activityDescriptionLabel;
 @property (nonatomic, weak) IBOutlet UIImageView *activityStaticImageView;
+
+- (void)updateCellWithData:(KidActivitiesModel *)activity;
 @end

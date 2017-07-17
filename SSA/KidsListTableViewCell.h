@@ -13,7 +13,7 @@
 
 @property (nonatomic, weak) IBOutlet UIImageView *kidImageView;
 @property (nonatomic, weak) IBOutlet UIView *dataView;
-@property (nonatomic, weak) IBOutlet UILabel *kidNameLabel,*schoolNameLabel;
+@property (nonatomic, weak) IBOutlet UILabel *kidNameLabel,*schoolNameLabel,*unreadMessagesCountLabel;
 
 - (void)updateCellWithData:(KID_MODEL *)kid;
 

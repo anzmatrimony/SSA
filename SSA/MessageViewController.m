@@ -15,11 +15,14 @@
 #import "SharedManager.h"
 #import "ObjectManager.h"
 #import "ChatViewController.h"
+#import "Firebase.h"
 
 @interface MessageViewController ()<AlertMessageDelegateProtocol>
 {
     NSMutableArray *arrayForBool;
     NSArray *kidsArray;
+    FIRDatabaseReference *kidRef;
+    FIRDatabaseReference *messagesRef;
 }
 @property (nonatomic, weak) IBOutlet UITableView *tableView;
 @end
@@ -28,15 +31,7 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    
     appDelegate = [[UIApplication sharedApplication] delegate];
-    
-    arrayForBool=[[NSMutableArray alloc]init];
-    kidsArray = [[NSArray alloc] init];
-    
-    [self fetchKidsList];
-    
-    
     [self.tableView registerNib:[UINib nibWithNibName:@"ActivitySectionHeaderView" bundle:nil] forHeaderFooterViewReuseIdentifier:@"ActivitySectionHeaderView"];
     
     self.tableView.estimatedRowHeight = UITableViewAutomaticDimension;
@@ -47,6 +42,19 @@
     // Dispose of any resources that can be recreated.
 }
 
+- (void)viewWillAppear:(BOOL)animated{
+    kidRef = [[[FIRDatabase database] reference] child:@"Kids"];
+    arrayForBool=[[NSMutableArray alloc]init];
+    kidsArray = [[NSArray alloc] init];
+    
+    [self fetchKidsList];
+}
+
+- (void)viewWillDisappear:(BOOL)animated{
+    [super viewWillDisappear:animated];
+    [messagesRef removeAllObservers];
+    [kidRef removeAllObservers];
+}
 /**
  * Fetching schools list added by parent
  */
@@ -64,6 +72,7 @@
                     }
                     [self.tableView reloadData];
                 }
+                [self addKidsInFirebaseIfNotAdded];
             }else{
                 if ([error.localizedDescription isEqualToString:TokenExpiredString]) {
                     [[AlertMessage sharedAlert] showAlertWithMessage:@"Session expired. Please login once again." withDelegate:self onViewController:self];
@@ -76,6 +85,47 @@
         });
     }];
 }
+
+- (void)addKidsInFirebaseIfNotAdded{
+    
+    FIRDatabaseReference *ref = [[FIRDatabase database] reference];
+    int i = 0;
+    for (KID_MODEL *kid in kidsArray) {
+        [[ref child:@"Kids"] observeEventType:FIRDataEventTypeValue withBlock:^(FIRDataSnapshot *snapShot){
+            if (![snapShot hasChild:kid.kidId]) {
+                FIRDatabaseReference *newKidRef;
+                newKidRef = [kidRef child:kid.kidId];
+                [newKidRef setValue:@{@"kidId":kid.kidId, @"kidName":kid.firstName, @"schoolUniqueId":kid.SchoolUniqueId, @"parentId":kid.parentUserRef,@"messages":@""}];
+            }else{
+                FIRDatabaseReference *existingKidRef;
+                existingKidRef = [kidRef child:kid.kidId];
+                messagesRef = [existingKidRef child:@"messages"];
+                [[[messagesRef queryOrderedByChild:@"status"] queryEqualToValue:@"sent"] observeEventType:FIRDataEventTypeValue withBlock:^(FIRDataSnapshot *snapShot1){
+                    NSLog(@"sent messages : %@",snapShot1.value);
+                    if (snapShot1.value != nil && ![snapShot1.value isEqual:[NSNull null]]) {
+                        NSDictionary *mesgDict = snapShot1.value;
+                        NSMutableArray *messagesArray = [[NSMutableArray alloc] init];
+                        for (NSString *key in [mesgDict allKeys]) {
+                            [messagesArray addObject:[mesgDict objectForKey:key]];
+                        }
+                        
+                        NSArray *tempArray = [messagesArray filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"senderId != %@",kid.kidId]];
+                        kid.unreadMessagesCount = [NSString stringWithFormat:@"%lu",(unsigned long)tempArray.count];
+                        
+                        dispatch_async(dispatch_get_main_queue(), ^{
+                            [self.tableView beginUpdates];
+                            [self.tableView reloadSections:[NSIndexSet indexSetWithIndex:i] withRowAnimation:UITableViewRowAnimationNone];
+                            [self.tableView endUpdates];
+                            
+                        });
+                    }
+                }];
+            }
+        }];
+        i = i + 1;
+    }
+}
+
 
 #pragma -mark UITableView Delegate and Datasource methods
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
@@ -128,6 +178,17 @@
 {
     ActivitySectionHeaderView *sectionHeaderView = [tableView dequeueReusableHeaderFooterViewWithIdentifier:@"ActivitySectionHeaderView"];
     sectionHeaderView.tag = section;
+    
+    KID_MODEL *kid = [kidsArray objectAtIndex:section];
+    [sectionHeaderView.kidNameLabel setText:[NSString stringWithFormat:@"%@ %@",kid.firstName,kid.lastName]];
+    [sectionHeaderView.schoolNameLabel setText:kid.schoolName];
+    if ([kid.unreadMessagesCount integerValue] > 0) {
+        sectionHeaderView.unreadMessagesCountLabel.hidden = false;
+        sectionHeaderView.unreadMessagesCountLabel.text = kid.unreadMessagesCount
+        ;
+    }else{
+        sectionHeaderView.unreadMessagesCountLabel.hidden = true;
+    }
     /********** Add UITapGestureRecognizer to SectionView   **************/
     
     UITapGestureRecognizer  *headerTapped   = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(sectionHeaderTapped:)];

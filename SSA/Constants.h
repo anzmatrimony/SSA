@@ -50,5 +50,7 @@
 #define GetProfile 8
 #define ValidateEmail 9
 #define KidListForTeacher 10
+#define GetActivitiesList 11
+#define ForgotPassword 12
 
 #endif /* Constants_h */

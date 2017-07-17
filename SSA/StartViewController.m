@@ -30,6 +30,7 @@ static const NSUInteger THNumberOfPinEntries = 6;
 - (void)viewDidLoad {
     [super viewDidLoad];
     
+    sleep(3);
     appDelegate = [[UIApplication sharedApplication] delegate];
     showEnterPinScreenFlag = true;
     if ([[NSUserDefaults standardUserDefaults] objectForKey:@"LoginStatus"] != nil){

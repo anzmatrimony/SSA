@@ -10,4 +10,6 @@
 
 @interface ActivitySectionHeaderView : UITableViewHeaderFooterView
 
+@property (nonatomic, weak) IBOutlet UILabel *kidNameLabel,*schoolNameLabel,*unreadMessagesCountLabel;
+
 @end

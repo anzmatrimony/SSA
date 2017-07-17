@@ -67,6 +67,8 @@
 		9364A22D1EBC97AE00337893 /* AFXMLRequestOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = 9364A2251EBC97AE00337893 /* AFXMLRequestOperation.m */; };
 		9364A2301EBC97D000337893 /* Parse.m in Sources */ = {isa = PBXBuildFile; fileRef = 9364A22F1EBC97D000337893 /* Parse.m */; };
 		9364A2331EBDE3E200337893 /* Utility.m in Sources */ = {isa = PBXBuildFile; fileRef = 9364A2321EBDE3E200337893 /* Utility.m */; };
+		937DCFEB1F1BEB7E0030FCD0 /* ActivitieyWebViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 937DCFEA1F1BEB7E0030FCD0 /* ActivitieyWebViewController.m */; };
+		937DCFEE1F1D107F0030FCD0 /* ForgotPasswordViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 937DCFED1F1D107F0030FCD0 /* ForgotPasswordViewController.m */; };
 		9397090A1EC5F54E00099774 /* ObjectManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 939709091EC5F54E00099774 /* ObjectManager.m */; };
 		9397090C1EC718B000099774 /* CheckMark@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 9397090B1EC718B000099774 /* CheckMark@2x.png */; };
 		9397090E1EC71FC100099774 /* check-box-empty@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 9397090D1EC71FC100099774 /* check-box-empty@2x.png */; };
@@ -214,6 +216,10 @@
 		9364A22F1EBC97D000337893 /* Parse.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Parse.m; sourceTree = "<group>"; };
 		9364A2311EBDE3E200337893 /* Utility.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Utility.h; sourceTree = "<group>"; };
 		9364A2321EBDE3E200337893 /* Utility.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Utility.m; sourceTree = "<group>"; };
+		937DCFE91F1BEB7E0030FCD0 /* ActivitieyWebViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ActivitieyWebViewController.h; sourceTree = "<group>"; };
+		937DCFEA1F1BEB7E0030FCD0 /* ActivitieyWebViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ActivitieyWebViewController.m; sourceTree = "<group>"; };
+		937DCFEC1F1D107F0030FCD0 /* ForgotPasswordViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ForgotPasswordViewController.h; sourceTree = "<group>"; };
+		937DCFED1F1D107F0030FCD0 /* ForgotPasswordViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ForgotPasswordViewController.m; sourceTree = "<group>"; };
 		939709081EC5F54E00099774 /* ObjectManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ObjectManager.h; sourceTree = "<group>"; };
 		939709091EC5F54E00099774 /* ObjectManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ObjectManager.m; sourceTree = "<group>"; };
 		9397090B1EC718B000099774 /* CheckMark@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "CheckMark@2x.png"; sourceTree = "<group>"; };
@@ -558,6 +564,8 @@
 				93A9FCFE1EB7484A00F49C5A /* ActivitiesListViewController.m */,
 				9364A1F81EB8B4ED00337893 /* KidsInActivityViewController.h */,
 				9364A1F91EB8B4ED00337893 /* KidsInActivityViewController.m */,
+				937DCFE91F1BEB7E0030FCD0 /* ActivitieyWebViewController.h */,
+				937DCFEA1F1BEB7E0030FCD0 /* ActivitieyWebViewController.m */,
 			);
 			name = Activities;
 			sourceTree = "<group>";
@@ -585,6 +593,8 @@
 				93A9FCCD1EB5EFA600F49C5A /* MpinViewController.m */,
 				9360EAAE1EE2D97F00ABFAC2 /* EnterPinViewController.h */,
 				9360EAAF1EE2D97F00ABFAC2 /* EnterPinViewController.m */,
+				937DCFEC1F1D107F0030FCD0 /* ForgotPasswordViewController.h */,
+				937DCFED1F1D107F0030FCD0 /* ForgotPasswordViewController.m */,
 			);
 			name = LoginAndRegistration;
 			sourceTree = "<group>";
@@ -922,6 +932,7 @@
 				9397090A1EC5F54E00099774 /* ObjectManager.m in Sources */,
 				93A9FCE41EB609A300F49C5A /* SchoolsListViewController.m in Sources */,
 				9364A22D1EBC97AE00337893 /* AFXMLRequestOperation.m in Sources */,
+				937DCFEE1F1D107F0030FCD0 /* ForgotPasswordViewController.m in Sources */,
 				93A9FCF71EB7039E00F49C5A /* KidsListTableViewCell.m in Sources */,
 				936136C31EB4F99500ABC921 /* AppDelegate.m in Sources */,
 				9364A2331EBDE3E200337893 /* Utility.m in Sources */,
@@ -944,6 +955,7 @@
 				9364A2101EBC977000337893 /* ServiceModel.m in Sources */,
 				936136F41EB58C1C00ABC921 /* LoginViewController.m in Sources */,
 				93A9FCDB1EB6096400F49C5A /* SchoolsViewController.m in Sources */,
+				937DCFEB1F1BEB7E0030FCD0 /* ActivitieyWebViewController.m in Sources */,
 				93A9FD021EB7575300F49C5A /* ActivitySectionHeaderView.m in Sources */,
 				93A9FCF11EB6EB1A00F49C5A /* AlertMessage.m in Sources */,
 				931053821EC9A8550032AFC5 /* NewKidViewController.m in Sources */,

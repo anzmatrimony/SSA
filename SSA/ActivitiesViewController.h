@@ -10,8 +10,10 @@
 #import "ActivitiesListViewController.h"
 #import "KidsInActivityViewController.h"
 #import "BaseViewController.h"
+@class AppDelegate;
 
 @interface ActivitiesViewController : BaseViewController
-
-
+{
+    AppDelegate *appDelegate;
+}
 @end

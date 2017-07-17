@@ -20,5 +20,6 @@
 - (NSArray *)parseSchoolsListResponse:(NSArray *)responseArray;
 - (NSArray *)parseKidsListResponse:(NSArray *)responseArray;
 - (NSArray *)parseKidsListResponseForTeacherLogIn:(NSArray *)responseArray;
+- (NSArray *)parseKidsActivities:(NSArray *)responseArray;
 
 @end

@@ -20,6 +20,7 @@
     UITextField *activeTextField;
     NSString *schoolName;
     NSDictionary *schoolResponseDict;
+    BOOL addSchoolStatus;
 }
 - (IBAction)addSchoolUIDNumberAction:(id)sender;
 - (IBAction)confirmSchoolAction:(id)sender;
@@ -32,6 +33,7 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     
+    addSchoolStatus  = false;
     appDelegate = [[UIApplication sharedApplication] delegate];
     [_UIDNumberField setDelegate:self];
     [_addSchoolImageBackgroundView.layer setCornerRadius:50/2];
@@ -178,14 +180,8 @@
             [[ProgressHUD sharedProgressHUD] removeHUD];
             if (!error) {
                 if ([[response objectForKey:@"body"] objectForKey:@"message"]) {
-                    
-                    if ([self.addSchoolViewControllerDelegate respondsToSelector:@selector(didSchoolAdded)]) {
-                        [self.addSchoolViewControllerDelegate didSchoolAdded];
-                    }
-                    if (self.isFromSchoolList) {
-                        self.fromSchoolistPage = false;
-                        [self.navigationController popViewControllerAnimated:YES];
-                    }
+                    addSchoolStatus = true;
+                    [[AlertMessage sharedAlert] showAlertWithMessage:@"School added scucessfully" withDelegate:self onViewController:self];
                     
                     //NSLog(@" Message %@", [[response objectForKey:@"body"] objectForKey:@"message"]);
                 }
@@ -223,7 +219,18 @@
 
 #pragma mark AlertMessageDelegateProtocol methods
 - (void)clickedOkButton{
-    [[SharedManager sharedManager] logoutTheUser];
-    [[SharedManager sharedManager] showLoginScreen];
+    if(addSchoolStatus){
+        if ([self.addSchoolViewControllerDelegate respondsToSelector:@selector(didSchoolAdded)]) {
+            [self.addSchoolViewControllerDelegate didSchoolAdded];
+        }
+        if (self.isFromSchoolList) {
+            self.fromSchoolistPage = false;
+            [self.navigationController popViewControllerAnimated:YES];
+        }
+    }else{
+        [[SharedManager sharedManager] logoutTheUser];
+        [[SharedManager sharedManager] showLoginScreen];
+    }
+    
 }
 @end

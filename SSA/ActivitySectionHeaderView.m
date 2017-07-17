@@ -18,4 +18,9 @@
 }
 */
 
+- (void)awakeFromNib{
+    _unreadMessagesCountLabel.layer.cornerRadius = 10;
+    _unreadMessagesCountLabel.clipsToBounds = true;
+}
+
 @end
