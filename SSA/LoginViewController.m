@@ -105,7 +105,7 @@
                     }
                     NSLog(@"Response %@",response);
                 }else{
-                    [[AlertMessage sharedAlert] showAlertWithMessage:@"Invalid Credentials" withDelegate:nil onViewController:self];
+                    [[AlertMessage sharedAlert] showAlertWithMessage:error.localizedDescription withDelegate:nil onViewController:self];
                 }
             });
         }];
@@ -132,7 +132,7 @@
 - (void)fetchProfileInfo{
     
     [[ProgressHUD sharedProgressHUD] showActivityIndicatorOnView:self.view];
-    [ServiceModel makeGetRequestFor:GetProfile WithInputParams:[NSString stringWithFormat:@"userId=%@&requestedOn=%@&requestedFrom=%@&guid=%@&userRef=%@&geoLocation=%@",_userNameField.text,[appDelegate getStringFromDate:[NSDate date] withFormat:@"dd-MM-yyyy%20hh:mm:ss"],@"Mobile",[appDelegate getUUID],_userNameField.text, [appDelegate currentLocation]] AndToken:[[NSUserDefaults standardUserDefaults] objectForKey:AccessToken] MakeHttpRequest:^(NSDictionary *response, NSError *error){
+    [ServiceModel makeGetRequestFor:GetProfile WithInputParams:[NSString stringWithFormat:@"userId=%@&requestedOn=%@&requestedFrom=%@&guid=%@&userRef=%@&geoLocation=%@",[_userNameField.text lowercaseString],[appDelegate getStringFromDate:[NSDate date] withFormat:@"dd-MM-yyyy%20hh:mm:ss"],@"Mobile",[appDelegate getUUID],_userNameField.text, [appDelegate currentLocation]] AndToken:[[NSUserDefaults standardUserDefaults] objectForKey:AccessToken] MakeHttpRequest:^(NSDictionary *response, NSError *error){
         dispatch_async(dispatch_get_main_queue(), ^{
             [[ProgressHUD sharedProgressHUD] removeHUD];
             if (!error) {
@@ -209,10 +209,18 @@
 }
 // Validating user inputs
 - (BOOL)doValidation{
-    if (_userNameField.text.length == 0 || _passwordField.text.length == 0) {
-        [[AlertMessage sharedAlert] showAlertWithMessage:@"Please fill all the fields" withDelegate:nil onViewController:self];
+    NSString *message = nil;
+    if (_userNameField.text.length == 0) {
+        message = @"Please enter username";
+    }else if (_passwordField.text.length == 0){
+        message = @"Please enter password";
+    }
+    
+    if (message != nil && message.length > 0) {
+        [[AlertMessage sharedAlert] showAlertWithMessage:message withDelegate:nil onViewController:self];
         return false;
     }
+    
     return true;
 }
 #pragma mark - UITextField Delegate Methods

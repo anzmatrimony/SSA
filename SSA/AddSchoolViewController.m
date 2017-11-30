@@ -134,6 +134,7 @@
 - (void)updateSchoolDetails:(NSDictionary *)schoolDict{
     schoolResponseDict = schoolDict;
     [_schoolNameLabel setText:[schoolDict objectForKey:@"SchoolName"]];
+    [_uidLabel setText:[schoolDict objectForKey:@"SchoolUniqueId"]];
     [_schoolAddressLabel setText:[NSString stringWithFormat:@"City : %@ \nState : %@ \nPincode : %@ \nWebSite : %@",[schoolDict objectForKey:@"city"],[schoolDict objectForKey:@"state"],[schoolDict objectForKey:@"zip"],[schoolDict objectForKey:@"WebSite"]]];
 }
 /**
@@ -181,6 +182,7 @@
             if (!error) {
                 if ([[response objectForKey:@"body"] objectForKey:@"message"]) {
                     addSchoolStatus = true;
+                    [self showAddSchoolUIDView];
                     [[AlertMessage sharedAlert] showAlertWithMessage:@"School added scucessfully" withDelegate:self onViewController:self];
                     
                     //NSLog(@" Message %@", [[response objectForKey:@"body"] objectForKey:@"message"]);
@@ -200,6 +202,13 @@
 }
 
 - (IBAction)showSchoolUIDNumberAction:(id)sender{
+    [self showAddSchoolUIDView];
+}
+
+/**
+ *@discussion Showing add school unique id view to add new school
+ */
+- (void)showAddSchoolUIDView{
     [_addSchoolUIDNumberBackgroundview setHidden:false];
     [_confirmSchoolBackgroundView setHidden:true];
     [_confirmSchoolImageView setImage:[UIImage imageNamed:@"confirmSchool-black.png"]];

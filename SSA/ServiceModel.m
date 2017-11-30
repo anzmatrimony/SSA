@@ -113,18 +113,53 @@
     
     switch (requestType) {
         case ParentRegistration:
-            requestString = [NSString stringWithFormat:@"%@http://49.207.0.196:8280/parentsRegistration/v1/parentRegistration",BaseURL];
+            if([[NSUserDefaults standardUserDefaults] boolForKey:IsPointingToAWS]){
+                requestString = [NSString stringWithFormat:@"%@int-p001_parentregistration/v1/parentRegistration",AWSBaseURL];
+            }else{
+                requestString = [NSString stringWithFormat:@"%@parentsRegistration/v1/parentRegistration",BaseURL];
+            }
+            
             break;
         case KidRegistration:
-            requestString = [NSString stringWithFormat:@"%@http://49.207.0.196:8280/addKids/v1/kidRegistration",BaseURL];
+            if([[NSUserDefaults standardUserDefaults] boolForKey:IsPointingToAWS]){
+                requestString = [NSString stringWithFormat:@"%@int-p005_addkids/v1/kidRegistration",AWSBaseURL];
+            }else{
+                requestString = [NSString stringWithFormat:@"%@addKids/v1/kidRegistration",BaseURL];
+            }
+            
             break;
         case ConfirmSchool:
-            requestString = [NSString stringWithFormat:@"%@http://49.207.0.196:8280/addingSchools/v1/parentSchoolRegistration",BaseURL];
+            if([[NSUserDefaults standardUserDefaults] boolForKey:IsPointingToAWS]){
+                requestString = [NSString stringWithFormat:@"%@int-p003_addingSchools/v1/parentSchoolRegistration",AWSBaseURL];
+            }else{
+                requestString = [NSString stringWithFormat:@"%@addingSchools/v1/parentSchoolRegistration",BaseURL];
+            }
+            
             break;
         case ForgotPassword:
-            requestString = [NSString stringWithFormat:@"%@http://49.207.0.196:8280/forgetpasword/1.0/forgotPassword",BaseURL];
+            if([[NSUserDefaults standardUserDefaults] boolForKey:IsPointingToAWS]){
+                requestString = [NSString stringWithFormat:@"%@resetpassword/1.0/forgotPassword",AWSBaseURL];
+            }else{
+                requestString = [NSString stringWithFormat:@"%@forgetpasword/1.0/forgotPassword",BaseURL];
+            }
+            
             break;
-        
+        case DeleteSchool:
+            if([[NSUserDefaults standardUserDefaults] boolForKey:IsPointingToAWS]){
+                requestString = [NSString stringWithFormat:@"%@delete_kids_parents/v1/deletekidsandSchool?%@",AWSBaseURL,inputParams];
+            }else{
+                requestString = [NSString stringWithFormat:@"%@DeleteSchoolsFromParents/v1/deletekidsandSchool?%@",BaseURL,inputParams];
+            }
+            
+            break;
+        case DeleteKid:
+            if([[NSUserDefaults standardUserDefaults] boolForKey:IsPointingToAWS]){
+                requestString = [NSString stringWithFormat:@"%@delete_kids_parents/v1/deletekids?%@",AWSBaseURL,inputParams];
+            }else{
+                requestString = [NSString stringWithFormat:@"%@DeleteSchoolsFromParents/v1/deletekids?%@",BaseURL,inputParams];
+            }
+            
+            break;
         default:
             break;
     }
@@ -177,10 +212,87 @@
     [client enqueueHTTPRequestOperation:operation];
 }
 
++ (void)makePostRequestWithOutBodyFor:(int)requestType WithInputParameters:(NSString *)inputParams AndToken:(NSString *)token MakeHttpRequest:(void (^)(NSDictionary *result, NSError* error))block{
+    
+    NSString *requestString;
+    
+    switch (requestType) {
+        
+        case DeleteSchool:
+            if([[NSUserDefaults standardUserDefaults] boolForKey:IsPointingToAWS]){
+                requestString = [NSString stringWithFormat:@"%@delete_kids_parents/v1/deletekidsandSchool?%@",AWSBaseURL,inputParams];
+            }else{
+                requestString = [NSString stringWithFormat:@"%@DeleteSchoolsFromParents/v1/deletekidsandSchool?%@",BaseURL,inputParams];
+            }
+            
+            break;
+        case DeleteKid:
+            if([[NSUserDefaults standardUserDefaults] boolForKey:IsPointingToAWS]){
+                requestString = [NSString stringWithFormat:@"%@delete_kids_parents/v1/deletekids?%@",AWSBaseURL,inputParams];
+            }else{
+                requestString = [NSString stringWithFormat:@"%@DeleteSchoolsFromParents/v1/deletekids?%@",BaseURL,inputParams];
+            }
+            
+            break;
+        default:
+            break;
+    }
+    
+    AFHTTPClient *client = [[AFHTTPClient alloc] initWithBaseURL:[NSURL URLWithString:requestString]];
+    
+    NSMutableURLRequest *request = [client requestWithMethod:@"POST" path:requestString parameters:nil];
+    
+    
+    [request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
+    
+    [request setValue:[NSString stringWithFormat:@"Bearer %@",token] forHTTPHeaderField:@"Authorization"];
+    
+    //NSLog(@" Phno Verfication Code Request %@",request);
+    AFHTTPRequestOperation *operation = [client HTTPRequestOperationWithRequest:request success:^(AFHTTPRequestOperation *operation, id responseObject){
+        @try {
+            NSError *error;
+            NSDictionary *mainDict = [[NSDictionary alloc] init];
+            mainDict = [NSJSONSerialization JSONObjectWithData:responseObject options:NSJSONReadingMutableLeaves error:&error];
+            NSLog(@"response %@",mainDict);
+            block(mainDict,nil);
+        }
+        @catch (NSException *exception) {
+            block(nil,[Utility showErrorWhenNetworkFailed]);
+        }
+        @finally {
+            
+        }
+    }failure:^(AFHTTPRequestOperation *operation, NSError *error){
+        NSInteger statusCode = operation.response.statusCode;
+        NSLog(@" Error Suggestion : %@",[error localizedRecoverySuggestion]);
+        NSError *error1;
+        if (statusCode == 401) {
+            NSString *errorJsonString = [error localizedRecoverySuggestion];
+            NSData *data = [errorJsonString dataUsingEncoding:NSUTF8StringEncoding];
+            id json = [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
+            if ([json objectForKey:@"fault"]) {
+                if ([[[json objectForKey:@"fault"] objectForKey:@"code"] integerValue] == 900901) {
+                    error1 = [NSError errorWithDomain:@"Network Error" code:statusCode userInfo:@{NSLocalizedDescriptionKey: TokenExpiredString}];
+                }
+            }else{
+                error1 = [NSError errorWithDomain:@"Network Error" code:statusCode userInfo:@{NSLocalizedDescriptionKey: @"Authentication failed"}];
+            }
+            block(nil,error1);
+        }
+        block(nil,[Utility showErrorWhenNetworkFailed]);
+    }];
+    
+    [client enqueueHTTPRequestOperation:operation];
+}
+
 
 + (void)GetAccessTokenWithOutPassword:(void (^)(NSDictionary *result, NSError *error))block{
     NSString *requestString = @"http://49.207.0.196:8280/token";
-    
+    if([[NSUserDefaults standardUserDefaults] boolForKey:IsPointingToAWS]){
+        requestString = [NSString stringWithFormat:@"%@token",AWSBaseURL];
+    }else{
+        requestString = [NSString stringWithFormat:@"%@token",BaseURL];
+    }
     NSMutableDictionary *dataDict = [[NSMutableDictionary alloc] init];
     [dataDict setObject:@"client_credentials" forKey:@"grant_type"];
     
@@ -194,7 +306,13 @@
     
     NSMutableURLRequest *request = [client requestWithMethod:@"POST" path:requestString parameters:dataDict];
     
-    [request setValue:[NSString stringWithFormat:@"Basic %@",[ServiceModel encodeStringTo64:autherizationString]] forHTTPHeaderField:@"Authorization"];
+    if(IsPointingToAWS){
+        NSLog(@"Authorization : Basic cjk0YUxWTmd6WDJFbkRIV25UT0xJTmZiTzNjYTpkdDhzVHN5ekd6SThzOUY0X1JlWXo5Ym5fTXdh");
+        [request setValue:@"Basic cjk0YUxWTmd6WDJFbkRIV25UT0xJTmZiTzNjYTpkdDhzVHN5ekd6SThzOUY0X1JlWXo5Ym5fTXdh" forHTTPHeaderField:@"Authorization"];
+    }else{
+        NSLog(@"Authorization : %@",[NSString stringWithFormat:@"Basic %@",[ServiceModel encodeStringTo64:autherizationString]]);
+        [request setValue:[NSString stringWithFormat:@"Basic %@",[ServiceModel encodeStringTo64:autherizationString]] forHTTPHeaderField:@"Authorization"];
+    }
     //[request setValue:@"Basic amlLb0FYRXc4T2pXYkF1c19pWVRyc2RQVkc0YTpLZjNBa3Nva0xZd282V0xpZ3ZJTnA2YlZWM01h" forHTTPHeaderField:@"Authorization"];
     [request setValue:@"application/x-www-form-urlencoded" forHTTPHeaderField:@"Content-Type"];
     
@@ -229,6 +347,11 @@
 + (void)getTokenWithUserName:(NSString *)userName AndPassword:(NSString *)password GetAccessToken:(void (^)(NSDictionary *result, NSError *error))block{
     NSString *requestString = @"http://49.207.0.196:8280/token";
     
+    if([[NSUserDefaults standardUserDefaults] boolForKey:IsPointingToAWS]){
+        requestString = [NSString stringWithFormat:@"%@token",AWSBaseURL];
+    }else{
+        requestString = [NSString stringWithFormat:@"%@token",BaseURL];
+    }
     NSMutableDictionary *dataDict = [[NSMutableDictionary alloc] init];
     [dataDict setObject:@"password" forKey:@"grant_type"];
     [dataDict setObject:userName forKey:@"username"];
@@ -240,11 +363,18 @@
     NSString *autherizationString = @"jiKoAXEw8OjWbAus_iYTrsdPVG4a:Kf3AksokLYwo6WLigvINp6bVV3Ma";
     
     
+    
     AFHTTPClient *client = [[AFHTTPClient alloc] initWithBaseURL:[NSURL URLWithString:requestString]];
     
     NSMutableURLRequest *request = [client requestWithMethod:@"POST" path:requestString parameters:dataDict];
+    if(IsPointingToAWS){
+        NSLog(@"Authorization : Basic cjk0YUxWTmd6WDJFbkRIV25UT0xJTmZiTzNjYTpkdDhzVHN5ekd6SThzOUY0X1JlWXo5Ym5fTXdh");
+        [request setValue:@"Basic cjk0YUxWTmd6WDJFbkRIV25UT0xJTmZiTzNjYTpkdDhzVHN5ekd6SThzOUY0X1JlWXo5Ym5fTXdh" forHTTPHeaderField:@"Authorization"];
+    }else{
+        NSLog(@"Authorization : %@",[NSString stringWithFormat:@"Basic %@",[ServiceModel encodeStringTo64:autherizationString]]);
+        [request setValue:[NSString stringWithFormat:@"Basic %@",[ServiceModel encodeStringTo64:autherizationString]] forHTTPHeaderField:@"Authorization"];
+    }
     
-    [request setValue:[NSString stringWithFormat:@"Basic %@",[ServiceModel encodeStringTo64:autherizationString]] forHTTPHeaderField:@"Authorization"];
     //[request setValue:@"Basic amlLb0FYRXc4T2pXYkF1c19pWVRyc2RQVkc0YTpLZjNBa3Nva0xZd282V0xpZ3ZJTnA2YlZWM01h" forHTTPHeaderField:@"Authorization"];
     [request setValue:@"application/x-www-form-urlencoded" forHTTPHeaderField:@"Content-Type"];
     
@@ -296,27 +426,74 @@
     
     switch (requestType) {
         case SchoolsList:
-            requestString = [NSString stringWithFormat:@"%@http://49.207.0.196:8280/schooList/v1/schoolList?%@",BaseURL,inputParams];
+            if([[NSUserDefaults standardUserDefaults] boolForKey:IsPointingToAWS]){
+                requestString = [NSString stringWithFormat:@"%@int-p002_parentsSchoolList/v1/schoolList?%@",AWSBaseURL,inputParams];
+            }else{
+                requestString = [NSString stringWithFormat:@"%@schooList/v1/schoolList?%@",BaseURL,inputParams];
+            }
+            
             break;
         case AddSchool:
-            requestString = [NSString stringWithFormat:@"%@http://49.207.0.196:8280/addingSchools/v1/parentSchoolRegistration?%@",BaseURL,inputParams];
+            if([[NSUserDefaults standardUserDefaults] boolForKey:IsPointingToAWS]){
+                requestString = [NSString stringWithFormat:@"%@int-p003_addingSchools/v1/parentSchoolRegistration?%@",AWSBaseURL,inputParams];
+            }else{
+                requestString = [NSString stringWithFormat:@"%@addingSchools/v1/parentSchoolRegistration?%@",BaseURL,inputParams];
+            }
+            
             break;
         case KidsList:
-            requestString = [NSString stringWithFormat:@"%@http://49.207.0.196:8280/kidList/v1/kidList?%@",BaseURL,inputParams];
+            if([[NSUserDefaults standardUserDefaults] boolForKey:IsPointingToAWS]){
+                requestString = [NSString stringWithFormat:@"%@int-p004_kidslist/v1/kidList?%@",AWSBaseURL,inputParams];
+            }else{
+                requestString = [NSString stringWithFormat:@"%@kidList/v1/kidList?%@",BaseURL,inputParams];
+            }
+            
             break;
         case GetProfile:
-            requestString = [NSString stringWithFormat:@"%@http://49.207.0.196:8280/UserProfile/v1/getUserProfile?%@",BaseURL,inputParams];
+            if([[NSUserDefaults standardUserDefaults] boolForKey:IsPointingToAWS]){
+                requestString = [NSString stringWithFormat:@"%@getuserProfiles/v1/getUserProfile?%@",AWSBaseURL,inputParams];
+            }else{
+               requestString = [NSString stringWithFormat:@"%@UserProfile/v1/getUserProfile?%@",BaseURL,inputParams];
+            }
+            
             break;
         case ValidateEmail:
-            requestString = [NSString stringWithFormat:@"%@http://49.207.0.196:8280/schoolRegistration/1.0/emailValidation?%@",BaseURL,inputParams];
+            if([[NSUserDefaults standardUserDefaults] boolForKey:IsPointingToAWS]){
+                requestString = [NSString stringWithFormat:@"%@schoolregistration1/1.0/emailValidation?%@",AWSBaseURL,inputParams];
+            }else{
+                requestString = [NSString stringWithFormat:@"%@schoolRegistration/1.0/emailValidation?%@",BaseURL,inputParams];
+            }
+            
             break;
         case KidListForTeacher:
-            requestString = [NSString stringWithFormat:@"%@http://49.207.0.196:8280/kidInformation/v1/getKidInformation?%@",BaseURL,inputParams];
+            if([[NSUserDefaults standardUserDefaults] boolForKey:IsPointingToAWS]){
+                requestString = [NSString stringWithFormat:@"%@kidInformation/v1/getKidInformation?%@",AWSBaseURL,inputParams];
+            }else{
+                requestString = [NSString stringWithFormat:@"%@kidInformation/v1/getKidInformation?%@",BaseURL,inputParams];
+            }
+            
             break;
         case GetActivitiesList:
-            requestString = [NSString stringWithFormat:@"%@http://49.207.0.196:8280/kidActivityInformation/v1/getKidActivityInformation?%@",BaseURL,inputParams];
+            if([[NSUserDefaults standardUserDefaults] boolForKey:IsPointingToAWS]){
+                requestString = [NSString stringWithFormat:@"%@int-p006_kidactivityinformationlist/v1/getKidActivityInformation?%@",AWSBaseURL,inputParams];
+            }else{
+                requestString = [NSString stringWithFormat:@"%@kidActivityInformation/v1/getKidActivityInformation?%@",BaseURL,inputParams];
+            }
             break;
-        
+        case GetActivitiesListAddedBySchoolUser:
+            if([[NSUserDefaults standardUserDefaults] boolForKey:IsPointingToAWS]){
+                requestString = [NSString stringWithFormat:@"%@getSUkidactivity/v1/getSUKidActivityInformation?%@",AWSBaseURL,inputParams];
+            }else{
+                requestString = [NSString stringWithFormat:@"%@getSUkidactivity/v1/getSUKidActivityInformation%@",BaseURL,inputParams];
+            }
+            break;
+        case ClassesListForSchool:
+            if([[NSUserDefaults standardUserDefaults] boolForKey:IsPointingToAWS]){
+                requestString = [NSString stringWithFormat:@"%@class_sections/1.0/class_sections?%@",AWSBaseURL,inputParams];
+            }else{
+                requestString = [NSString stringWithFormat:@"%@class_sections/1.0/class_sections?%@",BaseURL,inputParams];
+            }
+            break;
         default:
             break;
     }

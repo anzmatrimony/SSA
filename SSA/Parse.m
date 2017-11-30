@@ -52,11 +52,37 @@ static Parse *singleTonManager;
         school.ParentSchoolId = [self nullCheckForTheKey:@"ParentSchoolId" In:schoolDict] ? @"" : [schoolDict objectForKey:@"ParentSchoolId"];
         school.SchoolUniqueId = [self nullCheckForTheKey:@"SchoolUniqueId" In:schoolDict] ? @"" : [schoolDict objectForKey:@"SchoolUniqueId"];
         school.SchoolName = [self nullCheckForTheKey:@"SchoolName" In:schoolDict] ? @"" : [schoolDict objectForKey:@"SchoolName"];
-        
+        school.SchoolImageUrl = [NSString stringWithFormat:@"http://34.214.143.66:8888/getimages/school/%@.jpg",[schoolDict objectForKey:@"SchoolUniqueId"]];
         [schoolsListArray addObject:school];
     }
     
     return schoolsListArray;
+}
+
+
+/**
+ * @Discussion Parsing the classes list for the selected school
+ * @Param responseArray as a NSArray Objcet
+ * @Return NSArray object
+ **/
+- (NSArray *)parseClassesListResponse:(NSArray *)responseArray{
+    if (![self checkArrayList:responseArray]) {
+        return nil;
+    }
+    
+    NSMutableArray *classesListArray = [[NSMutableArray alloc] init];
+    if(responseArray.count == 0){
+        return classesListArray;
+    }
+    for (NSDictionary *classDict in responseArray) {
+        if (![self nullCheckForTheKey:@"Class" In:classDict]) {
+            NSDictionary *dict = @{@"Class" : [classDict objectForKey:@"Class"]};
+            
+            [classesListArray addObject:dict];
+        }
+    }
+    
+    return classesListArray;
 }
 
 
@@ -89,8 +115,46 @@ static Parse *singleTonManager;
         kid.parentUserRef = [self nullCheckForTheKey:@"parentUserRef" In:kidDict] ? @"" : [kidDict objectForKey:@"parentUserRef"];
         kid.SchoolUniqueId = [self nullCheckForTheKey:@"SchoolUniqueId" In:kidDict] ? @"" : [kidDict objectForKey:@"SchoolUniqueId"];
         kid.unreadMessagesCount = @"0";
-        
+    
         [kidsListArray addObject:kid];
+    }
+    
+    return kidsListArray;
+}
+
+/**
+ * @Discussion Parsing the schools list retrieved from the server
+ * @Param responseArray as a NSArray Objcet
+ * @Return NSArray object
+ **/
+- (NSArray *)parseActiveKidsListResponse:(NSArray *)responseArray{
+    if (![self checkArrayList:responseArray]) {
+        return nil;
+    }
+    
+    NSMutableArray *kidsListArray = [[NSMutableArray alloc] init];
+    for (NSDictionary *kidDict in responseArray) {
+        KID_MODEL *kid = [[KID_MODEL alloc] init];
+        kid.firstName = [self nullCheckForTheKey:@"firstName" In:kidDict] ? @"" : [kidDict objectForKey:@"firstName"];
+        kid.kidStatus = [self nullCheckForTheKey:@"kidStatus" In:kidDict] ? @"" : [kidDict objectForKey:@"kidStatus"];
+        kid.kidId = [self nullCheckForTheKey:@"kidId" In:kidDict] ? @"" : [kidDict objectForKey:@"kidId"];
+        kid.kidClass = [self nullCheckForTheKey:@"Class" In:kidDict] ? @"" : [kidDict objectForKey:@"Class"];
+        kid.modifiedBy = [self nullCheckForTheKey:@"modifiedBy" In:kidDict] ? @"" : [kidDict objectForKey:@"modifiedBy"];
+        kid.schoolName = [self nullCheckForTheKey:@"schoolName" In:kidDict] ? @"" : [kidDict objectForKey:@"schoolName"];
+        kid.createdOn = [self nullCheckForTheKey:@"createdOn" In:kidDict] ? @"" : [kidDict objectForKey:@"createdOn"];
+        kid.createdBy = [self nullCheckForTheKey:@"createdBy" In:kidDict] ? @"" : [kidDict objectForKey:@"createdBy"];
+        kid.Relationship = [self nullCheckForTheKey:@"Relationship" In:kidDict] ? @"" : [kidDict objectForKey:@"Relationship"];
+        kid.lastName = [self nullCheckForTheKey:@"lastName" In:kidDict] ? @"" : [kidDict objectForKey:@"lastName"];
+        kid.Section = [self nullCheckForTheKey:@"Section" In:kidDict] ? @"" : [kidDict objectForKey:@"Section"];
+        kid.modifiedOn = [self nullCheckForTheKey:@"modifiedOn" In:kidDict] ? @"" : [kidDict objectForKey:@"modifiedOn"];
+        kid.Image = [self nullCheckForTheKey:@"Image" In:kidDict] ? @"" : [kidDict objectForKey:@"Image"];
+        kid.parentUserRef = [self nullCheckForTheKey:@"parentUserRef" In:kidDict] ? @"" : [kidDict objectForKey:@"parentUserRef"];
+        kid.SchoolUniqueId = [self nullCheckForTheKey:@"SchoolUniqueId" In:kidDict] ? @"" : [kidDict objectForKey:@"SchoolUniqueId"];
+        kid.unreadMessagesCount = @"0";
+        
+        if ([kid.kidStatus isEqualToString:@"Active"]) {
+            [kidsListArray addObject:kid];
+        }
     }
     
     return kidsListArray;
@@ -127,7 +191,7 @@ static Parse *singleTonManager;
  * @Param responseArray as a NSArray Objcet
  * @Return NSArray object
  **/
-- (NSArray *)parseKidsActivities:(NSArray *)responseArray{
+- (NSMutableArray *)parseKidsActivities:(NSArray *)responseArray{
     if (![self checkArrayList:responseArray]) {
         return nil;
     }
@@ -146,7 +210,7 @@ static Parse *singleTonManager;
     return kidsListArray;
 }
 
-- (NSArray *)getKidActivities:(NSArray *)activities{
+- (NSMutableArray *)getKidActivities:(NSArray *)activities{
     if (![self checkArrayList:activities]) {
         return nil;
     }

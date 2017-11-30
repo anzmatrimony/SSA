@@ -17,9 +17,10 @@
 @interface ActivitiesListViewController ()<UITableViewDelegate>
 {
     NSMutableArray *arrayForBool;
-    NSArray *kidsArray;
+    NSMutableArray *kidsArray;
 }
 @property (nonatomic, weak) IBOutlet UITableView *tableView;
+@property (nonatomic, weak) IBOutlet UILabel *infoLabel;
 @end
 
 @implementation ActivitiesListViewController
@@ -47,7 +48,7 @@
 
 
 /**
- * Fetching schools list added by parent
+ * Fetching kid activities list added by class teacher
  */
 - (void)fetchKidsActivitiesList{
     
@@ -61,7 +62,61 @@
                 for (int i=0; i<[kidsArray count]; i++) {
                     [arrayForBool addObject:[NSNumber numberWithBool:NO]];
                 }
-                [self.tableView reloadData];
+                if (kidsArray.count > 0) {
+                    [self.tableView reloadData];
+                    [self.tableView setHidden:false];
+                    [self.infoLabel setHidden:true];
+                }else{
+                    [self.tableView setHidden:true];
+                    [self.infoLabel setHidden:false];
+                }
+                [self fetchKidsActivitiesListAddedBySchoolUser];
+                
+            }else{
+                if ([error.localizedDescription isEqualToString:TokenExpiredString]) {
+                    [[AlertMessage sharedAlert] showAlertWithMessage:@"Session expired. Please login once again." withDelegate:self onViewController:self];
+                }else{
+                    [[AlertMessage sharedAlert] showAlertWithMessage:error.localizedDescription withDelegate:nil onViewController:self];
+                }
+                NSLog(@" Error : %@", error.localizedDescription);
+            }
+            
+        });
+    }];
+}
+
+/**
+ * Fetching kid activities list added by school user
+ */
+- (void)fetchKidsActivitiesListAddedBySchoolUser{
+    [[ProgressHUD sharedProgressHUD] showActivityIndicatorOnView:self.view];
+    [ServiceModel makeGetRequestFor:GetActivitiesListAddedBySchoolUser WithInputParams:[NSString stringWithFormat:@"userRef=%@&requestedOn=%@&requestedFrom=%@&guid=%@&geoLocation=%@",[[NSUserDefaults standardUserDefaults] objectForKey:UserRef],[appDelegate getStringFromDate:[NSDate date] withFormat:@"dd-MM-yyyy%20hh:mm:ss"],@"Mobile",[appDelegate getUUID], [appDelegate currentLocation]]  AndToken:[[NSUserDefaults standardUserDefaults] objectForKey:AccessToken] MakeHttpRequest:^(NSDictionary *response, NSError *error){
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [[ProgressHUD sharedProgressHUD] removeHUD];
+            if (!error) {
+                NSArray *tempArray = [[Parse sharedParse] parseKidsActivities:[response objectForKey:@"body"]];
+                if (tempArray.count > 0) {
+                    for (KID_MODEL *kid in tempArray) {
+                        NSArray *tempKidsArray = [kidsArray filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"kidId == %@",kid.kidId]];
+                        if (tempKidsArray.count > 0) {
+                            KID_MODEL *existKid = [tempKidsArray objectAtIndex:0];
+                            [existKid.activities addObjectsFromArray:kid.activities];
+                        }else{
+                            [kidsArray addObject:kid];
+                            [arrayForBool addObject:[NSNumber numberWithBool:NO]];
+                        }
+                    }
+                }
+                
+                if (kidsArray.count > 0) {
+                    [self.tableView reloadData];
+                    [self.tableView setHidden:false];
+                    [self.infoLabel setHidden:true];
+                }else{
+                    [self.tableView setHidden:true];
+                    [self.infoLabel setHidden:false];
+                }
+                
                 
             }else{
                 if ([error.localizedDescription isEqualToString:TokenExpiredString]) {
@@ -115,8 +170,13 @@
     KidActivitiesModel *activity = [kid.activities objectAtIndex:indexPath.row];
     NSString *token = [NSString stringWithFormat:@"Bearer %@",[[NSUserDefaults standardUserDefaults] objectForKey:AccessToken]];
     token = [token stringByReplacingOccurrencesOfString:@" " withString:@"%20"];
-    
-    NSString *urlString = [NSString stringWithFormat:@"http://49.207.0.196:8888/kidactivity1.html?SchoolUniqueId=%@&userRef=%@&tid=%@&token=%@&kiduserID=%@&activityID=%@",activity.SchoolUniqueId,activity.teacheruserref,activity.templateID,token,kid.kidId,activity.activityID];
+    NSString *pointingURL;
+    if (IsPointingToAWS) {
+        pointingURL = @"http://34.214.143.66:8888/";
+    }else{
+        pointingURL = @"http://49.207.0.196:8888/";
+    }
+    NSString *urlString = [NSString stringWithFormat:@"%@kidactivity1.html?SchoolUniqueId=%@&userRef=%@&tid=%@&token=%@&kiduserID=%@&activityID=%@&parentUserRef=%@&activitySubject=%@",pointingURL,activity.SchoolUniqueId,activity.teacheruserref,activity.templateID,token,kid.kidId,activity.activityID,[[NSUserDefaults standardUserDefaults] objectForKey:UserRef],[activity.activitysubject stringByReplacingOccurrencesOfString:@" " withString:@"%20"]];
     // Form url to load
     ActivitieyWebViewController *activitieyWebViewController = [[ActivitieyWebViewController alloc] init];
     [activitieyWebViewController setUrlToLoad:urlString];
@@ -144,7 +204,8 @@
     sectionHeaderView.tag = section;
     KID_MODEL *kid = [kidsArray objectAtIndex:section];
     [sectionHeaderView.kidNameLabel setText:kid.firstName];
-    [sectionHeaderView.unreadMessagesCountLabel setHidden:true];
+    [sectionHeaderView.unreadMessagesCountLabel setHidden:false];
+    [sectionHeaderView.unreadMessagesCountLabel setText:[NSString stringWithFormat:@"%lu",(unsigned long)[kid.activities count]]];
     [sectionHeaderView.schoolNameLabel setHidden:true];
     /********** Add UITapGestureRecognizer to SectionView   **************/
     

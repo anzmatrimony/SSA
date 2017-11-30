@@ -25,6 +25,7 @@
     FIRDatabaseReference *messagesRef;
 }
 @property (nonatomic, weak) IBOutlet UITableView *tableView;
+@property (nonatomic, weak) IBOutlet UILabel *infoLabel;
 @end
 
 @implementation MessageViewController
@@ -65,13 +66,22 @@
             [[ProgressHUD sharedProgressHUD] removeHUD];
             if (!error) {
                 NSLog(@" Response  : %@", response);
-                kidsArray = (NSMutableArray *)[[Parse sharedParse] parseKidsListResponse:[response objectForKey:@"body"]];
+                
+                kidsArray = (NSMutableArray *)[[Parse sharedParse] parseActiveKidsListResponse:[response objectForKey:@"body"]];
+                
                 if (kidsArray.count > 0) {
                     for (int i=0; i<[kidsArray count]; i++) {
                         [arrayForBool addObject:[NSNumber numberWithBool:NO]];
                     }
                     [self.tableView reloadData];
+
+                    [self.tableView setHidden:false];
+                    [self.infoLabel setHidden:true];
+                }else{
+                    [self.tableView setHidden:true];
+                    [self.infoLabel setHidden:false];
                 }
+                
                 [self addKidsInFirebaseIfNotAdded];
             }else{
                 if ([error.localizedDescription isEqualToString:TokenExpiredString]) {

@@ -110,12 +110,12 @@ static SharedManager *singleTonManager;
         [mainWindow setRootViewController:navigationController];
         [mainWindow makeKeyAndVisible];
         return;
+    }else if([[[NSUserDefaults standardUserDefaults] objectForKey:Role] isEqualToString:@"parent"]){
+        // Showing tabs when parent loges in
+        tabBarController = [storyboard instantiateViewControllerWithIdentifier:@"TabsViewController"];
+        [mainWindow setRootViewController:tabBarController];
+        [mainWindow makeKeyAndVisible];
     }
-    
-    // Showing tabs when parent loges in
-    tabBarController = [storyboard instantiateViewControllerWithIdentifier:@"TabsViewController"];
-    [mainWindow setRootViewController:tabBarController];
-    [mainWindow makeKeyAndVisible];
 }
 
 - (void)logoutTheUser{

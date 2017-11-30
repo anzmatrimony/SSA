@@ -17,8 +17,10 @@
 #import "SharedManager.h"
 #import "ChatViewController.h"
 #import "Firebase.h"
+#import "AddKidViewController.h"
+#import "KidsListTableViewCellForTeacherTableViewCell.h"
 
-@interface KidsListViewController ()<AlertMessageDelegateProtocol>{
+@interface KidsListViewController ()<AlertMessageDelegateProtocol,AddKidViewControllerProtocol>{
     FIRDatabaseReference *kidRef;
 }
 
@@ -46,6 +48,8 @@
         [self addLogOutButton];
         [self fetchKids];
     }
+    
+    self.navigationController.navigationBar.tintColor = [UIColor whiteColor];
 }
 
 - (void)didReceiveMemoryWarning {
@@ -141,6 +145,14 @@
     [self.tableView reloadData];
 }
 -(IBAction)addNewKidAction:(id)sender{
+    if (self.isFromSchool) {
+        AddKidViewController *addKidViewController = [[UIStoryboard storyboardWithName:@"Main" bundle:nil] instantiateViewControllerWithIdentifier:@"AddKidViewController"];
+        [addKidViewController setFromSchoolPage:true];
+        [addKidViewController setFromKidsListPage:false];
+        [addKidViewController setSelectedSchool:self.selectedSchool];
+        [addKidViewController setAddKidViewControllerDelegate:self];
+        [self.navigationController pushViewController:addKidViewController animated:YES];
+    }
     if([self.kidsListViewControllerDelegate respondsToSelector:@selector(addNewKid)]){
         [self.kidsListViewControllerDelegate addNewKid];
     }
@@ -151,10 +163,18 @@
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath{
-    KidsListTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"KidsListTableViewCell"];
-    KID_MODEL *kid = [_kidsArray objectAtIndex:indexPath.row];
-    [cell updateCellWithData:kid];
-    return cell;
+    
+    if([[[NSUserDefaults standardUserDefaults] objectForKey:Role] isEqualToString:@"CT"] || [[[NSUserDefaults standardUserDefaults] objectForKey:Role] isEqualToString:@"SU"]){
+        KidsListTableViewCellForTeacherTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"KidsListTableViewCellForTeacherTableViewCell"];
+        KID_MODEL *kid = [_kidsArray objectAtIndex:indexPath.row];
+        [cell updateCellWithData:kid];
+        return cell;
+    }else{
+        KidsListTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"KidsListTableViewCell"];
+        KID_MODEL *kid = [_kidsArray objectAtIndex:indexPath.row];
+        [cell updateCellWithData:kid];
+        return cell;
+    }
 }
 
 - (CGFloat)tableView:(UITableView *)tableView estimatedHeightForRowAtIndexPath:(NSIndexPath *)indexPath{
@@ -173,7 +193,12 @@
 // Override to support editing the table view.
 - (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
     if (editingStyle == UITableViewCellEditingStyleDelete) {
-        //add code here for when you hit delete
+        if([[[NSUserDefaults standardUserDefaults] objectForKey:Role] isEqualToString:@"PARENT"] || [[[NSUserDefaults standardUserDefaults] objectForKey:Role] isEqualToString:@"parent"] || self.isFromSchool){
+            KID_MODEL *kid = [_kidsArray objectAtIndex:indexPath.row];
+            if ([self.kidsListViewControllerDelegate respondsToSelector:@selector(didDeleteKid:)]) {
+                [self.kidsListViewControllerDelegate didDeleteKid:kid];
+            }
+        }
     }
 }
 
@@ -197,4 +222,5 @@
     [[SharedManager sharedManager] logoutTheUser];
     [[SharedManager sharedManager] showLoginScreen];
 }
+
 @end

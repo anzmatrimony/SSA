@@ -24,6 +24,7 @@
 @property (strong, nonatomic) NSString* SchoolName;
 @property (strong, nonatomic) NSString* createdOn;
 @property (strong, nonatomic) NSString* ParentSchoolId;
+@property (strong, nonatomic) NSString* SchoolImageUrl;
 
 @end
 
@@ -47,7 +48,7 @@
 @property (strong, nonatomic) NSString* SchoolUniqueId;
 @property (strong, nonatomic) NSString* createdBy;
 @property (strong, nonatomic) NSString* unreadMessagesCount;
-@property (strong, nonatomic) NSArray * activities;
+@property (strong, nonatomic) NSMutableArray * activities;
 @end
 
 @interface KidActivitiesModel : NSObject

@@ -333,10 +333,10 @@
      *
      *  Show a timestamp for every 3rd message
      */
-    if (indexPath.item % 3 == 0) {
+    /*if (indexPath.item % 3 == 0) {
         JSQMessage *message = [messages objectAtIndex:indexPath.item];
         return [[JSQMessagesTimestampFormatter sharedFormatter] attributedTimestampForDate:message.date];
-    }
+    }*/
     
     return nil;
 }

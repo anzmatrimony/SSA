@@ -22,7 +22,7 @@
 @property (nonatomic, weak) IBOutlet UIView *addSchoolImageBackgroundView,*confirmSchoolImageBackgroundView;
 @property (nonatomic, weak) IBOutlet UIImageView *addSchoolImageView,*confirmSchoolImageView;
 @property (nonatomic, weak) IBOutlet UITextField *UIDNumberField;
-@property (nonatomic, weak) IBOutlet UILabel *schoolNameLabel,*schoolAddressLabel;
+@property (nonatomic, weak) IBOutlet UILabel *schoolNameLabel,*schoolAddressLabel,*uidLabel;
 
 @property (nonatomic, assign, getter=isFromSchoolList) BOOL fromSchoolistPage;
 @property (nonatomic, strong) id<AddSchoolViewControllerProtocol> addSchoolViewControllerDelegate;

@@ -37,9 +37,13 @@
 #define Password @"Password"
 #define schoolUniqueId @"SchoolUniqueId"
 #define TeacherName @"TeacherName"
+#define IsPointingToAWS @"IsPointingToAWS"
+#define AcceptableCharectersForEmail @"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890.@"
+#define PasswordInfoString @"Password must contain atleast 8 characters, one capital letter, one small letter, one number and one special character"
 
 #define IsTouchIdRequired @"TouchIdRequired"
-#define BaseURL @""
+#define BaseURL @"http://49.207.0.196:8280/"
+#define AWSBaseURL @"http://34.214.143.66:8280/"
 #define ParentRegistration 1
 #define SchoolRegistration 2
 #define KidRegistration 3
@@ -52,5 +56,8 @@
 #define KidListForTeacher 10
 #define GetActivitiesList 11
 #define ForgotPassword 12
-
+#define DeleteSchool 13
+#define DeleteKid 14
+#define ClassesListForSchool 15
+#define GetActivitiesListAddedBySchoolUser 16
 #endif /* Constants_h */

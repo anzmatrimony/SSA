@@ -8,10 +8,13 @@
 
 #import <UIKit/UIKit.h>
 #import "SchoolsListTableViewCell.h"
+#import "ObjectManager.h"
 
 @protocol SchoolsListViewControllerProtocol <NSObject>
 
 - (void)addNewSchool;
+- (void)didSelecteDeleteSchool:(SCHOOL_MODEL *)schoolToDelete;
+- (void)didSelectSchool:(SCHOOL_MODEL *)selectedSchool;
 
 @end
 @interface SchoolsListViewController : UIViewController

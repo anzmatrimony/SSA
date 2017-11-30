@@ -13,7 +13,7 @@
 
 @property (nonatomic, weak) IBOutlet UIImageView *schoolImageView;
 @property (nonatomic, weak) IBOutlet UIView *dataView;
-@property (nonatomic, weak) IBOutlet UILabel *schoolNameLabel,*schoolAddressLabel;
+@property (nonatomic, weak) IBOutlet UILabel *schoolNameLabel,*schoolAddressLabel,*schoolUidLabel;
 
 - (void)updateData:(SCHOOL_MODEL *)school;
 @end

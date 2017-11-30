@@ -8,6 +8,7 @@
 
 #import "SchoolsListTableViewCell.h"
 #import "Constants.h"
+#import "UIImageView+WebCache.h"
 
 @implementation SchoolsListTableViewCell
 
@@ -30,5 +31,7 @@
 - (void)updateData:(SCHOOL_MODEL *)school{
     [_schoolNameLabel setText:school.SchoolName];
     [_schoolAddressLabel setText:school.createdOn];
+    [_schoolUidLabel setText:school.SchoolUniqueId];
+    [_schoolImageView sd_setImageWithURL:[NSURL URLWithString:school.SchoolImageUrl] placeholderImage:[UIImage imageNamed:@"List-of-Schools-Black.png"]];
 }
 @end

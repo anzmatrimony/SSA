@@ -28,6 +28,10 @@ static const NSUInteger THNumberOfPinEntries = 6;
     // Applying color to navigation bar and navigation bar title
     [[UINavigationBar appearance] setBarTintColor:COLOR(42, 103, 130)];
     [[UINavigationBar appearance] setTintColor:[UIColor whiteColor]];
+    NSDictionary *navbarTitleTextAttributes = [NSDictionary dictionaryWithObjectsAndKeys:
+                                               [UIColor whiteColor],UITextAttributeTextColor, nil];
+    
+    [[NSUserDefaults standardUserDefaults] setBool:true forKey:IsPointingToAWS];
     
     self.currentLocation = @"0.0,0.0";
     
@@ -204,7 +208,7 @@ static const NSUInteger THNumberOfPinEntries = 6;
         [returnString appendFormat:@"%C", [numbers characterAtIndex:arc4random() % [numbers length]]];
     }
         
-    return returnString;
+    return [NSString stringWithFormat:@"%@ae",returnString];
     
     //return [[NSUUID UUID] UUIDString];
 }

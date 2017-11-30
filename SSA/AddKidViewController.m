@@ -19,22 +19,25 @@
 
 @interface AddKidViewController ()<AlertMessageDelegateProtocol>{
     UITextField *activeTextField;
-    NSString *selectedSchool,*selectedClass,*selectedSection,*selectedRelation;
-    NSArray *classListArray,*sectionsListArray,*relationShipListArray;
-    NSMutableArray *schoolsListArray;
+    NSString *selectedSchool,*selectedClass,*selectedSection,*selectedRelation,*selectedKidImageId;
+    NSArray *sectionsListArray,*relationShipListArray;
+    NSMutableArray *schoolsListArray,*classListArray;
     BOOL addKidStatus;
 }
 
 @property (nonatomic, weak) IBOutlet UITextField *firstNameField,*lastNameField;
-@property (nonatomic, weak) IBOutlet UIView *schoolBackgroundview,*classBackgroundView,*sectionBackgroundView,*relationsShipBackgroundView,*chooseImageBackgroundView,*pickerViewBackgroundView;
+@property (nonatomic, weak) IBOutlet UIView *schoolBackgroundview,*classBackgroundView,*relationsShipBackgroundView,*chooseImageBackgroundView,*pickerViewBackgroundView;
 @property (nonatomic, weak) IBOutlet UIImageView *addKidImageView;
 @property (nonatomic, weak) IBOutlet UIPickerView *pickerView;
-@property (nonatomic, weak) IBOutlet UIButton *schoolButton,*classButton,*sectionButton,*relationButton;
+@property (nonatomic, weak) IBOutlet UIButton *schoolButton,*classButton,*relationButton;
+@property (nonatomic, weak) IBOutlet UILabel *kidImagePathLabel;
 - (IBAction)dropDownSelectionAction:(id)sender;
 
 
 - (IBAction)submitAction:(id)sender;
 - (IBAction)doneAction:(id)sender;
+- (IBAction)browseImageAction:(id)sender;
+
 @end
 
 @implementation AddKidViewController
@@ -46,8 +49,10 @@
     appDelegate = [[UIApplication sharedApplication] delegate];
     [appDelegate initializeLocationManager];
     schoolsListArray = [[NSMutableArray alloc] init];
+    classListArray = [[NSMutableArray alloc] init];
+    selectedKidImageId = 0;
     
-    classListArray = [[NSArray alloc] initWithObjects:@"LKG",@"UKG",@"FIRST CLASS",@"SECOND CLASS",@"THIRD CLASS",@"FOURTH CLASS",@"FIFTH CLASS",@"SIXTH CLASS",@"SEVENTH CLASS",@"EIGTH CLASS",@"NINTH CLASS", @"TENTH CLASS", nil];
+    //classListArray = [[NSArray alloc] initWithObjects:@"LKG",@"UKG",@"FIRST CLASS",@"SECOND CLASS",@"THIRD CLASS",@"FOURTH CLASS",@"FIFTH CLASS",@"SIXTH CLASS",@"SEVENTH CLASS",@"EIGTH CLASS",@"NINTH CLASS", @"TENTH CLASS", nil];
     sectionsListArray = [[NSArray alloc] initWithObjects:@"SECTION-A",@"SECTION-B",@"SECTION-C",@"SECTION-D", nil];
     relationShipListArray = [[NSArray alloc] initWithObjects:@"Father",@"Mother", nil];
     
@@ -58,10 +63,16 @@
     [self applyDesignToView:_lastNameField];
     
     [self applyDesignToView:_classBackgroundView];
-    [self applyDesignToView:_sectionBackgroundView];
+    //[self applyDesignToView:_sectionBackgroundView];
     [self applyDesignToView:_relationsShipBackgroundView];
     [self applyDesignToView:_chooseImageBackgroundView];
     [self applyDesignToView:_schoolBackgroundview];
+    
+    if (self.isFromSchoolPage) {
+        [schoolsListArray addObject:self.selectedSchool];
+        self.title = self.selectedSchool.SchoolName;
+        [self updateSelectedSchool:[schoolsListArray objectAtIndex:0]];
+    }
 }
 
 - (void)didReceiveMemoryWarning {
@@ -86,10 +97,47 @@
             [[ProgressHUD sharedProgressHUD] removeHUD];
             if (!error) {
                 NSLog(@" Response  : %@", response);
-                schoolsListArray = (NSMutableArray *)[[Parse sharedParse] parseSchoolsListResponse:[response objectForKey:@"body"]];
-                if (schoolsListArray.count == 0) {
+                schoolsListArray = [[[Parse sharedParse] parseSchoolsListResponse:[response objectForKey:@"body"]] mutableCopy];
+                
+                SCHOOL_MODEL *school = [[SCHOOL_MODEL alloc] init];
+                
+                school.SchoolUniqueId = @"-1";
+                school.SchoolName = @"Select School";
+                
+                [schoolsListArray insertObject:school atIndex:0];
+                
+                if (schoolsListArray.count == 1) {
                     [[AlertMessage sharedAlert] showAlertWithMessage:@"Please register atleast one school to add kid" withDelegate:nil onViewController:self];
                 }
+            }else{
+                if ([error.localizedDescription isEqualToString:TokenExpiredString]) {
+                    [[AlertMessage sharedAlert] showAlertWithMessage:@"Session expired. Please login once again." withDelegate:self onViewController:self];
+                }else{
+                    [[AlertMessage sharedAlert] showAlertWithMessage:error.localizedDescription withDelegate:nil onViewController:self];
+                }
+                NSLog(@" Error : %@", error.localizedDescription);
+            }
+            
+        });
+    }];
+}
+
+/**
+ * Fetching schools list added by parent
+ */
+- (void)fetchClassesListFortheSelectedSchool{
+    [[ProgressHUD sharedProgressHUD] showActivityIndicatorOnView:self.view];
+    [ServiceModel makeGetRequestFor:ClassesListForSchool WithInputParams:[NSString stringWithFormat:@"uid=%@",selectedSchool]  AndToken:[[NSUserDefaults standardUserDefaults] objectForKey:AccessToken] MakeHttpRequest:^(NSDictionary *response, NSError *error){
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [[ProgressHUD sharedProgressHUD] removeHUD];
+            if (!error) {
+                NSLog(@" Response  : %@", response);
+                [classListArray removeAllObjects];
+                classListArray = [[[Parse sharedParse] parseClassesListResponse:response] mutableCopy];
+                
+                NSDictionary *classDict = @{@"Class" : @"Select Class"};
+                [classListArray insertObject:classDict atIndex:0];
+                
             }else{
                 if ([error.localizedDescription isEqualToString:TokenExpiredString]) {
                     [[AlertMessage sharedAlert] showAlertWithMessage:@"Session expired. Please login once again." withDelegate:self onViewController:self];
@@ -120,13 +168,15 @@
         [bodyDict setObject:selectedClass forKey:@"classe"];
         [bodyDict setObject:_firstNameField.text forKey:@"firstName"];
         [bodyDict setObject:_lastNameField.text forKey:@"lastName"];
-        [bodyDict setObject:selectedSection forKey:@"section"];
+        //[bodyDict setObject:[[selectedSection componentsSeparatedByString:@"-"] objectAtIndex:1] forKey:@"section"];
+        [bodyDict setObject:@"NA" forKey:@"section"];
         [bodyDict setObject:[[_schoolButton titleLabel] text] forKey:@"SchoolName"];
         [bodyDict setObject:selectedSchool forKey:@"SchoolUniqueId"];
         [bodyDict setObject:@"Pending" forKey:@"kidstatus"];
         [bodyDict setObject:selectedRelation forKey:@"createdBy"];
         [bodyDict setObject:[appDelegate getStringFromDate:[NSDate date] withFormat:@"dd-MM-yyyy%20HH:MM:SS"] forKey:@"createdOn"];
         [bodyDict setObject:[[NSUserDefaults standardUserDefaults] objectForKey:UserRef] forKey:@"parentUserRef"];
+        [bodyDict setObject:selectedKidImageId forKey:@"Image"];
         
         [mainDict setObject:bodyDict forKey:@"body"];
         [[ProgressHUD sharedProgressHUD] showActivityIndicatorOnView:self.view];
@@ -135,8 +185,22 @@
             dispatch_async(dispatch_get_main_queue(), ^{
                 [[ProgressHUD sharedProgressHUD] removeHUD];
                 if (!error) {
-                    if ([[response objectForKey:@"body"] objectForKey:@"fmessage"]) {
-                        [[AlertMessage sharedAlert] showAlertWithMessage:[[response objectForKey:@"body"] objectForKey:@"fmessage"] withDelegate:nil onViewController:self];
+                    if ([[response objectForKey:@"body"] objectForKey:@"smessage"]) {
+                        
+                        [_firstNameField setText:@""];
+                        [_lastNameField setText:@""];
+                        [_schoolButton setTitle:@"" forState:UIControlStateNormal];
+                        [_classButton setTitle:@"" forState:UIControlStateNormal];
+                        [_relationButton setTitle:@"" forState:UIControlStateNormal];
+                        [_kidImagePathLabel setText:@""];
+                        
+                        selectedSchool = nil;
+                        selectedRelation = nil;
+                        selectedKidImageId = nil;
+                        selectedClass = nil;
+                        
+                        addKidStatus = true;
+                        [[AlertMessage sharedAlert] showAlertWithMessage:[[response objectForKey:@"body"] objectForKey:@"smessage"] withDelegate:self onViewController:self];
                         return ;
                     }
                     [self moveToPreviousScreen];
@@ -153,6 +217,11 @@
         }];
          
     }
+}
+
+- (void)updateSelectedImagePathWith:(NSDictionary *)dict{
+    [self.kidImagePathLabel setText:[dict objectForKey:@"ImageName"]];
+    selectedKidImageId = [dict objectForKey:@"ImageId"];
 }
 
 - (void)moveToPreviousScreen{
@@ -175,17 +244,39 @@
 - (IBAction)doneAction:(id)sender{
     [_pickerViewBackgroundView setHidden:true];
     [activeTextField resignFirstResponder];
+    if ([_pickerView tag] == 100 && classListArray.count == 0) { // checking is school selected or not to fetch the classes for the selected school
+        [self fetchClassesListFortheSelectedSchool];
+    }
 }
 
+- (IBAction)browseImageAction:(id)sender{
+    KidsPhotosViewController *kidsPhotosViewController = [[UIStoryboard storyboardWithName:@"Main" bundle:nil] instantiateViewControllerWithIdentifier:@"KidsPhotosViewController"];
+    [kidsPhotosViewController setKidsPhotosViewControllerDelegate:self];
+    UINavigationController *navController = [[UINavigationController alloc] initWithRootViewController:kidsPhotosViewController];
+    [self presentViewController:navController animated:YES completion:nil];
+}
 /**
  * @Discussion Validating user inputs
  * @Return boolean value
  **/
 - (BOOL)doValidation{
-    if (_firstNameField.text.length == 0 || _lastNameField.text.length == 0 || selectedSchool == nil || selectedClass == nil || selectedSection == nil || selectedRelation == nil) {
-        [[AlertMessage sharedAlert] showAlertWithMessage:@"Please fill all the fields" withDelegate:nil onViewController:self];
+    NSString *message = nil;
+    if (_firstNameField.text.length == 0) {
+        message = @"Please enter first name";
+    }else if(_lastNameField.text.length == 0){
+        message = @"Please enter last name";
+    }else if(selectedSchool == nil || [selectedSchool isEqualToString:@"-1"]){
+        message = @"Please select school";
+    }else if(selectedClass == nil || [selectedClass isEqualToString:@"Select Class"]){
+        message = @"Please select class";
+    }else if(selectedRelation == nil){
+        message = @"Please select relation";
+    }
+    if (message != nil && message.length > 0) {
+        [[AlertMessage sharedAlert] showAlertWithMessage:message withDelegate:nil onViewController:self];
         return false;
     }
+    
     return true;
 }
 #pragma mark - UITextField Delegate Methods
@@ -245,7 +336,7 @@
             title = school.SchoolName;
             break;
         case 200:
-            title = [classListArray objectAtIndex:row];
+            title = [[classListArray objectAtIndex:row] objectForKey:@"Class"];
             break;
         case 300:
             title = [sectionsListArray objectAtIndex:row];
@@ -271,12 +362,12 @@
             
             break;
         case 200:
-            selectedClass = [classListArray objectAtIndex:row];
+            selectedClass = [[classListArray objectAtIndex:row] objectForKey:@"Class"];
             [_classButton setTitle:selectedClass forState:UIControlStateNormal];
             break;
         case 300:
-            selectedSection = [sectionsListArray objectAtIndex:row];
-            [_sectionButton setTitle:selectedSection forState:UIControlStateNormal];
+            selectedSection = [sectionsListArray objectAtIndex:row] ;
+            //[_sectionButton setTitle:selectedSection forState:UIControlStateNormal];
             break;
         case 400:
             selectedRelation = [relationShipListArray objectAtIndex:row];
@@ -291,23 +382,41 @@
 - (void)updateSelectedSchool:(SCHOOL_MODEL *)schoolModel{
     selectedSchool = schoolModel.SchoolUniqueId;
     [_schoolButton setTitle:schoolModel.SchoolName forState:UIControlStateNormal];
+    [self fetchClassesListFortheSelectedSchool];
+    selectedClass = nil;
+    [_classButton setTitle:@"Please select class" forState:UIControlStateNormal];
 }
 
 #pragma mark AlertMessageDelegateProtocol methods
 - (void)clickedOkButton{
     if (addKidStatus) {
-        if ([self.addKidViewControllerDelegate respondsToSelector:@selector(didKidAddedWithKidName:AndSchoolName:)]) {
-            [self.addKidViewControllerDelegate didKidAddedWithKidName:[NSString stringWithFormat:@"%@ %@",_firstNameField.text,_lastNameField.text] AndSchoolName:[[_schoolButton titleLabel] text]];
+        if (self.fromSchoolPage) {
+            [self.navigationController popToRootViewControllerAnimated:YES];
+        }else{
+            if ([self.addKidViewControllerDelegate respondsToSelector:@selector(didKidAddedWithKidName:AndSchoolName:)]) {
+                [self.addKidViewControllerDelegate didKidAddedWithKidName:[NSString stringWithFormat:@"%@ %@",_firstNameField.text,_lastNameField.text] AndSchoolName:[[_schoolButton titleLabel] text]];
+            }
+            
+            if ([self isFromKidsListPage]) {
+                self.fromKidsListPage = false;
+                [self.navigationController popViewControllerAnimated:YES];
+            }
         }
         
-        if ([self isFromKidsListPage]) {
-            self.fromKidsListPage = false;
-            [self.navigationController popViewControllerAnimated:YES];
-        }
     }else{
         [[SharedManager sharedManager] logoutTheUser];
         [[SharedManager sharedManager] showLoginScreen];
     }
     
+}
+
+#pragma -mark KidsPhotosViewControllerProtocol methods
+- (void)didDismiss{
+    [self dismissViewControllerAnimated:YES completion:nil];
+}
+
+- (void)didSelectKidImage:(NSDictionary *)selectedKidImageDict{
+    [self didDismiss];
+    [self updateSelectedImagePathWith:selectedKidImageDict];
 }
 @end

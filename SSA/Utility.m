@@ -14,7 +14,7 @@
     
     NSDictionary *dict;
     if (![self checkNetworkStatus])
-        dict = @{NSLocalizedDescriptionKey: @"Please enable network connection"};
+        dict = @{NSLocalizedDescriptionKey: @"No internet connection"};
     else
         dict = @{NSLocalizedDescriptionKey: @"Problem Fetching Data. Please try again."};
     

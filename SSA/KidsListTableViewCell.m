@@ -32,6 +32,14 @@
 - (void)updateCellWithData:(KID_MODEL *)kid{
     [_kidNameLabel setText:[NSString stringWithFormat:@"%@ %@",kid.firstName,kid.lastName]];
     [_schoolNameLabel setText:kid.schoolName];
+    [_classNameLabel setText:kid.kidClass];
+    [_sectionLabel setText:[NSString stringWithFormat:@"SECTION-%@",kid.Section]];
+    [_statusLabel setText:[NSString stringWithFormat:@"Status : %@",kid.kidStatus]];
+    if(kid.Image != nil && ([kid.Image integerValue] > 0 && [kid.Image integerValue] < 11)){
+        [_kidImageView setImage:[UIImage imageNamed:[NSString stringWithFormat:@"kid%@.jpg",kid.Image]]];
+    }else{
+        [_kidImageView setImage:[UIImage imageNamed:@"nopic.png"]];
+    }
     if ([kid.unreadMessagesCount integerValue] != 0) {
         [_unreadMessagesCountLabel setHidden:false];
         [_unreadMessagesCountLabel setText:kid.unreadMessagesCount];

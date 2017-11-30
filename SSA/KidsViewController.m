@@ -73,6 +73,7 @@
  * Fetching schools list added by parent
  */
 - (void)fetchKidsList{
+    
     [[ProgressHUD sharedProgressHUD] showActivityIndicatorOnView:self.view];
     [ServiceModel makeGetRequestFor:KidsList WithInputParams:[NSString stringWithFormat:@"parentUserRef=%@&userRef=%@&requestedon=%@&requestedfrom=%@&guid=%@&geolocation=%@",[[NSUserDefaults standardUserDefaults] objectForKey:UserRef],[[NSUserDefaults standardUserDefaults] objectForKey:UserRef],[appDelegate getStringFromDate:[NSDate date] withFormat:@"dd-MM-yyyy%20HH:MM:SS"],@"Mobile",[appDelegate getUUID],[appDelegate currentLocation]] AndToken:[[NSUserDefaults standardUserDefaults] objectForKey:AccessToken] MakeHttpRequest:^(NSDictionary *response, NSError *error){
         dispatch_async(dispatch_get_main_queue(), ^{
@@ -127,6 +128,35 @@
         }];
     }
 }
+
+/**
+ * Delete kid from the parent kids list
+ * Param school object
+ */
+- (void)deleKid:(KID_MODEL *)kid{
+    [[ProgressHUD sharedProgressHUD] showActivityIndicatorOnView:self.view];
+    [ServiceModel makePostRequestWithOutBodyFor:DeleteKid WithInputParameters:[NSString stringWithFormat:@"KidId=%@&ParentRef=%@&requestedOn=%@&requestedFrom=%@&geoLocation=%@",kid.kidId,[[NSUserDefaults standardUserDefaults] objectForKey:UserRef],[appDelegate getStringFromDate:[NSDate date] withFormat:@"dd-MM-yyyy%20hh:mm:ss"],@"Mobile", [appDelegate currentLocation]]  AndToken:[[NSUserDefaults standardUserDefaults] objectForKey:AccessToken] MakeHttpRequest:^(NSDictionary *response, NSError *error){
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [[ProgressHUD sharedProgressHUD] removeHUD];
+            if (!error) {
+                NSLog(@" Response  : %@", response);
+                if ([[response objectForKey:@"body"] objectForKey:@"message"]) {
+                    [[AlertMessage sharedAlert] showAlertWithMessage:[[response objectForKey:@"body"] objectForKey:@"message"] withDelegate:nil onViewController:self];
+                    [self fetchKidsList];
+                }
+            }else{
+                if ([error.localizedDescription isEqualToString:TokenExpiredString]) {
+                    [[AlertMessage sharedAlert] showAlertWithMessage:@"Session expired. Please login once again." withDelegate:self onViewController:self];
+                }else{
+                    [[AlertMessage sharedAlert] showAlertWithMessage:error.localizedDescription withDelegate:nil onViewController:self];
+                }
+                NSLog(@" Error : %@", error.localizedDescription);
+            }
+            
+        });
+    }];
+}
+
 - (void)showKidsListView{
     //[self removeAndReloadView];
     if (!kidsListViewController) {
@@ -178,6 +208,9 @@
     [self.navigationController pushViewController:viewController animated:YES];
 }
 
+- (void)didDeleteKid:(KID_MODEL *)kid{
+    [self deleKid:kid];
+}
 #pragma mark AlertMessageDelegateProtocol methods
 - (void)clickedOkButton{
     [[SharedManager sharedManager] logoutTheUser];

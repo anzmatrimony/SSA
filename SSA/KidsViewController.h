@@ -9,7 +9,6 @@
 #import <UIKit/UIKit.h>
 #import "KidsListViewController.h"
 #import "AddKidViewController.h"
-#import "NewKidViewController.h"
 #import "BaseViewController.h"
 
 @class AppDelegate;

@@ -26,6 +26,8 @@
 
 @property (nonatomic, weak) IBOutlet UIView *agreeTextContainerView,*genderBackgroundView;
 @property (nonatomic, weak) IBOutlet UIButton *termsAndConditionsCheckBoxButton,*maleCheckBoxButton,*femaleCheckBoxButton;
+@property (nonatomic, weak) IBOutlet UIScrollView *scrollView;
+@property (nonatomic, weak) IBOutlet UIView *contentView;
 
 - (IBAction)registerAction:(id)sender;
 @end
@@ -38,6 +40,8 @@
     [self.navigationController setNavigationBarHidden:NO animated:YES];
     
     appDelegate = [[UIApplication sharedApplication] delegate];
+    
+    [self.scrollView setContentSize:CGSizeMake([[UIScreen mainScreen] bounds].size.width - 32, 660)];
     
     [appDelegate initializeLocationManager];
     isAgreedToTermsAndConditions = false;
@@ -73,6 +77,7 @@
     [self buildAgreeTextViewFromString:NSLocalizedString(@"I accept #<ts>Terms and Conditions# and #<pp>Privacy Policy#",
                                                          @"PLEASE NOTE: please translate \"Terms and Conditions\" and \"Privacy Policy\" as well, and leave the #<ts># and #<pp># around your translations just as in the English version of this message.")];
     [self getAccessToken];
+    [self addToolBarOnTopOfKeyboard];
 }
 
 - (void)viewDidAppear:(BOOL)animated{
@@ -94,6 +99,23 @@
     textField.leftViewMode = UITextFieldViewModeAlways;
 }
 
+/*!
+ * @discussion adding tool bar on top of the keybord to dismiss the keybord
+ */
+- (void)addToolBarOnTopOfKeyboard{
+    UIToolbar* numberToolbar = [[UIToolbar alloc]initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, 50)];
+    numberToolbar.barStyle = UIBarStyleBlackTranslucent;
+    numberToolbar.items = [NSArray arrayWithObjects:
+                           [[UIBarButtonItem alloc]initWithTitle:@"Done" style:UIBarButtonItemStyleDone target:self action:@selector(dismissKeyboard)],nil];
+    [numberToolbar sizeToFit];
+    _phoneNumberField.inputAccessoryView = numberToolbar;
+}
+
+- (void)dismissKeyboard{
+    if (activeTextField == nil)
+        return;
+    [activeTextField resignFirstResponder];
+}
 /**
  * @Discussion updating user interface of gender based on user selection (True -> Male; False -> Female)
  * @Param flag as a boolean value (True -> Male; False -> Female)
@@ -235,21 +257,32 @@
 }
 // Validating user inputs
 - (BOOL)doValidation{
-    if (_firstNameField.text.length == 0 || _lastNameField.text.length == 0 || _emailField.text.length == 0 || _passwordFiedl.text.length == 0 || _confirmPasswordField.text.length == 0 || _phoneNumberField.text.length == 0) {
-        [[AlertMessage sharedAlert] showAlertWithMessage:@"Please fill all the fields" withDelegate:nil onViewController:self];
-        return NO;
+    NSString *message = nil;
+    if (_firstNameField.text.length == 0) {
+        message = @"Please enter first name";
+    }else if (_lastNameField.text.length == 0){
+        message = @"Please enter last name";
+    }else if (_emailField.text.length == 0){
+        message = @"Please enter email";
+    }else if (_passwordFiedl.text.length == 0){
+        message = @"Please enter password";
+    }else if (_confirmPasswordField.text.length == 0){
+        message = @"Please enter confirm password";
+    }else if(![self isValidPassword:_passwordFiedl.text]){
+        message = PasswordInfoString;
     }else if (![_passwordFiedl.text isEqualToString:_confirmPasswordField.text]){
-        [[AlertMessage sharedAlert] showAlertWithMessage:@"Password and confirm password must be same" withDelegate:nil onViewController:self];
-        return NO;
+        message = @"Password and confirm password must be same";
     }else if (!isAgreedToTermsAndConditions) {
-        [[AlertMessage sharedAlert] showAlertWithMessage:@"Please accept terms of service and privacy policy" withDelegate:nil onViewController:self];
-        return NO;
+        message = @"Please accept terms of service and privacy policy";
     }else if(![self isValidEmail]){
-        [[AlertMessage sharedAlert] showAlertWithMessage:@"Please enter valid email address" withDelegate:nil onViewController:self];
-        return NO;
+        message = @"Please enter valid email address. Please use only Letters(a-z),numbers,@ and .(fullstop)";
     }else if(!isEmailValidated){
-        [[AlertMessage sharedAlert] showAlertWithMessage:@"EmailID already exist. Please try another." withDelegate:nil onViewController:self];
-        return NO;
+        message = @"EmailID already exist. Please try another";
+    }
+    
+    if (message != nil && message.length > 0) {
+        [[AlertMessage sharedAlert] showAlertWithMessage:message withDelegate:nil onViewController:self];
+        return false;
     }
     return YES;
 }
@@ -265,6 +298,42 @@
     NSString *emailRegex = stricterFilter ? stricterFilterString : laxString;
     NSPredicate *emailTest = [NSPredicate predicateWithFormat:@"SELF MATCHES %@", emailRegex];
     return [emailTest evaluateWithObject:_emailField.text];
+}
+
+/*!
+ * @dicussion validating password entered by the use (Password needs to have 1 small charector 1 upper charecter and 1 number)
+ * @param password as NSString object
+ * @return boolean value
+ */
+-(BOOL)isValidPassword:(NSString *)password
+{
+    NSLog(@"Password : %@",password);
+    NSCharacterSet *upperCaseChars = [NSCharacterSet characterSetWithCharactersInString:@"ABCDEFGHIJKLKMNOPQRSTUVWXYZ"];
+    NSCharacterSet *lowerCaseChars = [NSCharacterSet characterSetWithCharactersInString:@"abcdefghijklmnopqrstuvwxyz"];
+    //NSCharacterSet *numbers = [NSCharacterSet characterSetWithCharactersInString:@"0123456789"];
+    NSCharacterSet *specialCharecters = [NSCharacterSet characterSetWithCharactersInString:@"@#&*%^"];
+    
+    if ( [password length]<8 )
+        return NO;  //too short
+    NSRange range;
+    range = [password rangeOfCharacterFromSet:[NSCharacterSet letterCharacterSet]];
+    if ( !range.length )
+        return NO;  // no letter
+    range = [password rangeOfCharacterFromSet:[NSCharacterSet decimalDigitCharacterSet]];
+    if ( !range.length )
+        return NO;  // no number;
+    range = [password rangeOfCharacterFromSet:upperCaseChars];
+    if ( !range.length )
+        return NO;  // no uppercase letter;
+    range = [password rangeOfCharacterFromSet:lowerCaseChars];
+    if ( !range.length )
+        return NO;  // no lowerCase Chars;
+    range = [password rangeOfCharacterFromSet:specialCharecters];
+    if (!range.length) {
+        return NO; // no special charcter
+    }
+    return YES;
+    
 }
 
 - (void)registerParentWithToken:(NSString *)token{
@@ -283,8 +352,14 @@
     [bodyDict setObject:_firstNameField.text forKey:@"firstName"];
     [bodyDict setObject:_lastNameField.text forKey:@"lastName"];
     [bodyDict setObject:_passwordFiedl.text forKey:@"password"];
-    [bodyDict setObject:_emailField.text forKey:@"emailId"];
-    [bodyDict setObject:_phoneNumberField.text forKey:@"phoneNumber"];
+    [bodyDict setObject:[_emailField.text lowercaseString] forKey:@"emailId"];
+    
+    if ([_phoneNumberField.text length] > 0) {
+        [bodyDict setObject:_phoneNumberField.text forKey:@"phoneNumber"];
+    }else{
+        [bodyDict setObject:@"NA" forKey:@"phoneNumber"];
+    }
+    
     [bodyDict setObject:isGenderMale?@"Male":@"Female" forKey:@"Gender"];
     [mainDict setObject:bodyDict forKey:@"body"];
     
@@ -382,20 +457,57 @@
         [self checkEmailExistence];
     }
     if (textField.tag == 300) {
-        if (_passwordFiedl.text != _confirmPasswordField.text) {
+        if (_confirmPasswordField.text.length > 0 && ![self isValidPassword:_confirmPasswordField.text]) {
+            [[AlertMessage sharedAlert] showAlertWithMessage:PasswordInfoString withDelegate:nil onViewController:self];
+            return;
+        }
+        
+        if (_confirmPasswordField.text.length > 0 ) {
+            if(![_passwordFiedl.text isEqualToString:_confirmPasswordField.text]){
             [[AlertMessage sharedAlert] showAlertWithMessage:@"Password and confirm password must be same" withDelegate:nil onViewController:self];
+            return;
+            }
         }
     }
     
     if (textField.tag == 200) {
+        
+        if (_passwordFiedl.text.length > 0 && ![self isValidPassword:_passwordFiedl.text]) {
+            [[AlertMessage sharedAlert] showAlertWithMessage:PasswordInfoString withDelegate:nil onViewController:self];
+            return;
+        }
+        
         if (_confirmPasswordField.text.length > 0) {
-            if (_passwordFiedl.text != _confirmPasswordField.text) {
+            
+            if (![_passwordFiedl.text isEqualToString:_confirmPasswordField.text]) {
                 [[AlertMessage sharedAlert] showAlertWithMessage:@"Password and confirm password must be same" withDelegate:nil onViewController:self];
+                return;
             }
         }
     }
     activeTextField = nil;
 }
+
+- (BOOL)textField:(UITextField *)textField shouldChangeCharactersInRange:(NSRange)range replacementString:(NSString *)string{
+    NSCharacterSet *cs;
+    NSString *filtered;
+    if ([textField tag] == 4) {
+        if(range.length + range.location > textField.text.length)
+        {
+            return NO;
+        }
+        NSUInteger newLength = [textField.text length] + [string length] - range.length;
+        return newLength <= 10;  // phone number field max length
+    }if([textField tag] == 100){ // Email
+        cs = [[NSCharacterSet characterSetWithCharactersInString:AcceptableCharectersForEmail] invertedSet];
+        filtered = [[string componentsSeparatedByCharactersInSet:cs] componentsJoinedByString:@""];
+        if (![string isEqualToString:filtered]) {
+            return NO;
+        }
+    }
+    return true;
+}
+
 - (BOOL)textFieldShouldReturn:(UITextField *)textField{
     [textField resignFirstResponder];
     return true;

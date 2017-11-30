@@ -32,4 +32,5 @@
 + (void)getTokenWithUserName:(NSString *)userName AndPassword:(NSString *)password GetAccessToken:(void (^)(NSDictionary *result, NSError *error))block;
 
 + (void)GetAccessTokenWithOutPassword:(void (^)(NSDictionary *result, NSError *error))block;
++ (void)makePostRequestWithOutBodyFor:(int)requestType WithInputParameters:(NSString *)inputParams AndToken:(NSString *)token MakeHttpRequest:(void (^)(NSDictionary *result, NSError* error))block;
 @end

@@ -59,7 +59,10 @@
 }
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath{
-    
+    SCHOOL_MODEL *school =  [self.schoolsArray objectAtIndex:indexPath.row];
+    if ([self.schoolsListViewControllerDelegate respondsToSelector:@selector(didSelectSchool:)]) {
+        [self.schoolsListViewControllerDelegate didSelectSchool:school];
+    }
 }
 
 - (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath {
@@ -70,7 +73,10 @@
 // Override to support editing the table view.
 - (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
     if (editingStyle == UITableViewCellEditingStyleDelete) {
-        //add code here for when you hit delete
+        SCHOOL_MODEL *school =  [self.schoolsArray objectAtIndex:indexPath.row];
+        if ([self.schoolsListViewControllerDelegate respondsToSelector:@selector(didSelecteDeleteSchool:)]) {
+            [self.schoolsListViewControllerDelegate didSelecteDeleteSchool:school];
+        }
     }
 }
 @end
